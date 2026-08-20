@@ -1,0 +1,6 @@
+# Versions of the other repositories this build embeds. Used only when their
+# checkouts are not beside this one: then the release with this tag is
+# downloaded instead. With the checkouts present they are built from source and
+# these numbers are ignored.
+protocol=0.1.0
+coderpack=0.1.0
