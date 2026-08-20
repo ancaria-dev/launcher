@@ -1,0 +1,25 @@
+/dist/
+
+# Assembled by tools/build.ps1 and embedded into the binary by the Go build.
+# Only the .gitkeep is tracked, so the directory exists before the first build.
+/install/payload/*
+!/install/payload/.gitkeep
+
+# Path to this machine's Sacred Gold folder.
+.local.settings
+
+# `go build` with no -o drops the binary next to main.go.
+*.exe
+
+# The icon and version resources, written by `go run ./tools/rsrc` from
+# tools/rsrc/sacred.ico and .version, and linked in by name. Both inputs are
+# tracked; this is not.
+/rsrc_windows_amd64.syso
+
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+
+.DS_Store
+Thumbs.db
