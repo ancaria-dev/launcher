@@ -1,0 +1,60 @@
+{
+    // Go module, PowerShell under tools/, and a WebView2 UI under ui/web.
+    // gofmt and VS Code's built-in HTML/CSS formatters are canonical, so a
+    // whole-file format on save is what is wanted here.
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.rulers": [80],
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+
+    // gofmt indents with tabs; 4 is how they are rendered.
+    "[go]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "golang.go",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    // CI runs `go test ./... -count=1` because the hook-scanner test reads the
+    // freshly staged payload and must not be served from the test cache.
+    "go.testFlags": ["-count=1"],
+    // Nothing lints this module in CI; staticcheck in the editor is the
+    // substitute rather than an extra tool to install.
+    "gopls": {
+        "ui.diagnostic.staticcheck": true
+    },
+
+    // tools/*.ps1 keep the opening brace on the same line throughout.
+    "powershell.codeFormatting.preset": "OTBS",
+
+    // ui/web is 2-space and single-quoted, the one hand-written front end here.
+    "[html]": {
+        "editor.tabSize": 2
+    },
+    "[css]": {
+        "editor.tabSize": 2
+    },
+    "[javascript]": {
+        "editor.tabSize": 2
+    },
+    "javascript.preferences.quoteStyle": "single",
+
+    // dist/ is `go build` output. install/payload/ is assembled by
+    // tools/build.ps1 from sibling checkouts -- including a staged copy of
+    // coderpack's agent, which is 4-space double-quoted Frida JavaScript and
+    // would contradict every JS setting above. Hidden rather than merely
+    // unsearchable, so nobody edits the staged copy instead of the source.
+    "files.exclude": {
+        "dist": true,
+        "install/payload": true
+    },
+    "files.watcherExclude": {
+        "**/dist/**": true,
+        "**/install/payload/**": true
+    }
+}
