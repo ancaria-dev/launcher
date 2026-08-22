@@ -1,0 +1,60 @@
+{
+  "result":[
+    {
+      "major_version":26,
+      "term_of_support":"STS",
+      "maintained":true,
+      "early_access_only":false,
+      "release_status":"ga"
+    }
+,
+    {
+      "major_version":25,
+      "term_of_support":"LTS",
+      "maintained":true,
+      "early_access_only":false,
+      "release_status":"ga"
+    }
+,
+    {
+      "major_version":21,
+      "term_of_support":"LTS",
+      "maintained":true,
+      "early_access_only":false,
+      "release_status":"ga"
+    }
+,
+    {
+      "major_version":17,
+      "term_of_support":"LTS",
+      "maintained":true,
+      "early_access_only":false,
+      "release_status":"ga"
+    }
+,
+    {
+      "major_version":11,
+      "term_of_support":"LTS",
+      "maintained":true,
+      "early_access_only":false,
+      "release_status":"ga"
+    }
+,
+    {
+      "major_version":8,
+      "term_of_support":"LTS",
+      "maintained":true,
+      "early_access_only":false,
+      "release_status":"ga"
+    }
+,
+    {
+      "major_version":7,
+      "term_of_support":"LTS",
+      "maintained":true,
+      "early_access_only":false,
+      "release_status":"ga"
+    }
+  ],
+  "message":""
+}
