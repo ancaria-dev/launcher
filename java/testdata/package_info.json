@@ -1,0 +1,14 @@
+{
+  "result":[
+    {
+    "filename":"jdk-25.0.4_windows-x64_bin.zip",
+    "direct_download_uri":"https://download.oracle.com/java/25/archive/jdk-25.0.4_windows-x64_bin.zip",
+    "download_site_uri":"",
+    "signature_uri":"",
+    "checksum_uri":"https://download.oracle.com/java/25/archive/jdk-25.0.4_windows-x64_bin.zip.sha256",
+    "checksum":"",
+    "checksum_type":"sha256"
+  }
+    ],
+  "message":""
+}
