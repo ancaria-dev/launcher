@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sacred Mod Loader</title>
+<style>/*style*/</style>
+</head>
+<body>
+  <header>
+    <div class="mark" role="img" aria-label="Sacred Gold"></div>
+    <div class="titles">
+      <h1>Sacred Mod Loader</h1>
+      <p id="version">&nbsp;</p>
+    </div>
+  </header>
+
+  <!-- Only ever shown to somebody whose game is not the build the addresses
+       were taken from. Above the mods and above Play, because it is about the
+       decision to press Play. -->
+  <p id="build" hidden></p>
+
+  <main>
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Mods</h2>
+        <!-- Two lists rather than one with sections in it: what is installed is
+             something to switch on and off, what is available is something to
+             choose. They are different jobs and they get different rows. -->
+        <div class="tabs">
+          <button id="tab-installed" type="button" class="tab on">Installed</button>
+          <button id="tab-available" type="button" class="tab">Available</button>
+        </div>
+        <span id="count"></span>
+      </div>
+
+      <div id="page-installed">
+        <ul id="mods"></ul>
+        <p id="empty" hidden>No mods installed yet. Browse Available to find
+          some.</p>
+      </div>
+
+      <div id="page-available" hidden>
+        <ul id="offers"></ul>
+        <p id="offers-empty" hidden></p>
+        <div class="browse-foot">
+          <button id="sources-open" type="button" class="ghost">Repositories</button>
+          <button id="refresh" type="button" class="ghost">Refresh</button>
+        </div>
+      </div>
+
+      <!-- Outside both, because a download started under Available finishes
+           while somebody is looking at Installed. -->
+      <div id="store-bar" class="bar" hidden><div id="store-fill"></div></div>
+      <p id="store-note" class="hint"></p>
+      <p id="store-error" class="bad" hidden></p>
+
+      <!-- A <details> cannot be animated open in a way that works on every
+           WebView2 a player might have, so the disclosure is a button and a
+           drawer that grows from 0fr to 1fr. -->
+      <section id="advanced" hidden>
+        <button id="disclose" type="button" aria-expanded="false">
+          <span class="caret"></span>Hooks<span id="hookstate"></span>
+        </button>
+        <div class="drawer">
+          <div>
+            <p class="hint">Each hook is a point where the loader attaches to
+              the game. Turn one off to stop its events. This can help you find
+              a faulty hook. Click a module name to toggle all its hooks.</p>
+            <div id="hooks"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <aside class="panel">
+      <h2>Launch</h2>
+
+      <!-- The loader's Java side runs in a JVM the host starts as its own
+           process. No JDK, no mods -- and that is a thing to say before Play
+           rather than after a game where nothing happened. -->
+      <div id="java">
+        <p id="java-line"></p>
+        <button id="java-open" type="button" class="ghost"></button>
+      </div>
+
+      <label class="field">
+        <span>Extra flags for Sacred</span>
+        <input id="flags" type="text" placeholder="None" spellcheck="false">
+      </label>
+      <label class="check">
+        <input id="debug" type="checkbox">
+        <span>Show the console while playing</span>
+      </label>
+      <button id="play">Play</button>
+      <p class="hint">The launcher hides while Sacred is running and returns
+        when you quit the game.</p>
+    </aside>
+  </main>
+
+  <!-- Where mods come from. A dialog for the same reason: adding a repository
+       is a thing a player does once, if ever. -->
+  <div id="sources" class="overlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="sources-title">
+      <h2 id="sources-title">Mod repositories</h2>
+      <p class="hint">A mod repository is a Git repository with
+        <code>sacred.mods.repository.json</code> in its root. The launcher
+        reads this file and its images without cloning the repository. Downloaded
+        mods do not run until you press Play.</p>
+
+      <ul id="source-list"></ul>
+
+      <label class="field">
+        <span>Repository URL</span>
+        <input id="source-url" type="text" spellcheck="false"
+               placeholder="https://github.com/someone/mods.git">
+      </label>
+      <label class="field">
+        <span>Access token for a private repository</span>
+        <input id="source-token" type="password" spellcheck="false" placeholder="None">
+      </label>
+      <p id="source-hint" class="hint"></p>
+      <p id="source-error" class="bad" hidden></p>
+
+      <div class="actions">
+        <button id="sources-close" type="button" class="ghost">Close</button>
+        <button id="source-add" type="button">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- The JDK fetcher. A dialog rather than another panel: it is a thing a
+       player does once and then never opens again. -->
+  <div id="jdk" class="overlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="jdk-title">
+      <h2 id="jdk-title">Get Java</h2>
+      <p class="hint">Mods run in a Java virtual machine beside the game.
+        Without a JDK, Sacred still launches but no mods load. The launcher
+        downloads the JDK to <code>launcher\java</code> in the game folder. It
+        does not install anything elsewhere, and deleting the game folder also
+        removes the JDK.</p>
+
+      <div class="pair">
+        <label class="field">
+          <span>Distribution</span>
+          <select id="jdk-vendor"></select>
+        </label>
+        <label class="field">
+          <span>Version</span>
+          <select id="jdk-version"></select>
+        </label>
+      </div>
+
+      <div id="jdk-bar" class="bar" hidden><div id="jdk-fill"></div></div>
+      <p id="jdk-note" class="hint"></p>
+      <p id="jdk-error" class="bad" hidden></p>
+
+      <div class="actions">
+        <button id="jdk-close" type="button" class="ghost">Close</button>
+        <button id="jdk-get" type="button">Download</button>
+      </div>
+    </div>
+  </div>
+
+<script>/*script*/</script>
+</body>
+</html>
