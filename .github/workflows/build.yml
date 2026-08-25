@@ -1,0 +1,64 @@
+# GitHub only runs workflows from .github/workflows/, so the file lives one
+# directory deeper than the sketch of this layout said.
+name: build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The publish gate asks the remote whether this version's tag exists.
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
+      # No sibling checkouts on purpose. The host, the jars and the agent come
+      # from the releases pinned in .dependencies, which is both reproducible
+      # and the same path a person gets when they clone this repository alone.
+      # Bump .dependencies to ship a newer host or a newer agent.
+      - name: Build
+        shell: pwsh
+        run: pwsh tools/build.ps1 -Protocol none -Coderpack none
+
+      # After the payload exists: the hook scanner test reads the agent that
+      # was just staged, and skips itself when there is none.
+      - run: go vet ./...
+      - run: go test ./... -count=1
+
+      - name: Version and whether it is new
+        id: gate
+        shell: bash
+        run: |
+          version=$(cat .version | tr -d '[:space:]')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null 2>&1; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "v$version is already published; nothing to do"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "v$version is new"
+          fi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sacred-mod-loader-${{ steps.gate.outputs.version }}
+          path: dist/Sacred Mod Loader.exe
+
+      # Creates the tag as well, which is what the gate above reads next time.
+      - name: Release
+        if: steps.gate.outputs.publish == 'true' && github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: v${{ steps.gate.outputs.version }}
+          files: dist/Sacred Mod Loader.exe
