@@ -8,9 +8,9 @@
 
     Those come from the sibling checkouts when they are there, because that is
     what a full workspace looks like and because somebody changing the host
-    wants their change in the build. With no siblings, the releases named in
-    .dependencies are downloaded instead, so a lone clone of this repository
-    builds with nothing installed but Go.
+    wants their change in the build. With no siblings, the releases pinned in
+    dependencies.json are downloaded instead, so a lone clone of this
+    repository builds with nothing installed but Go.
 
 .PARAMETER Bump
     Raises the patch number in .version before building.
@@ -54,9 +54,9 @@ if ($Bump) {
 Write-Host "Sacred Mod Loader $version"
 
 $pinned = @{}
-Get-Content (Join-Path $root '.dependencies') |
-    Where-Object { $_ -match '^\s*([a-z]+)\s*=\s*(\S+)' } |
-    ForEach-Object { $pinned[$Matches[1]] = $Matches[2] }
+Get-Content (Join-Path $root 'dependencies.json') -Raw |
+    ConvertFrom-Json |
+    ForEach-Object { $pinned[$_.path -replace '^ancaria-dev/', ''] = $_.version }
 
 function Need($path, $what) {
     if (-not (Test-Path $path)) { throw "Could not find $what at $path" }
@@ -65,7 +65,7 @@ function Need($path, $what) {
 
 function Fetch($repo, $file, $into) {
     $tag = $pinned[$repo]
-    if (-not $tag) { throw "No version is pinned for $repo in .dependencies" }
+    if (-not $tag) { throw "No version is pinned for $repo in dependencies.json" }
     $url = "https://github.com/ancaria-dev/$repo/releases/download/v$tag/$file"
     Write-Host "      $url"
     try {
@@ -84,7 +84,7 @@ function Fetch($repo, $file, $into) {
         }
         throw "Could not download $file from $repo v${tag}: $why.`n" +
               "Clone https://github.com/ancaria-dev/$repo.git beside this " +
-              "repository or pin a released version in .dependencies."
+              "repository or pin a released version in dependencies.json."
     }
 }
 
