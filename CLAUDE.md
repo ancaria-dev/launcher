@@ -240,6 +240,10 @@ through the dependency download path, then runs `go vet ./...` and
 publishes only when `.version` has no `v<version>` tag on the remote. The
 release contains `dist/Sacred Mod Loader.exe` and creates that tag. `-Bump`
 raises the number, and raising it is what makes a new release eligible.
+`tools/version.ps1` does the same edit directly: no argument prints the
+current version, `pwsh tools/version.ps1 0.99.1` writes a specific one. It
+never touches `dependencies.json` -- that pins `protocol` and `coderpack`,
+not this repository.
 
 `install.ps1` reads the game path from `.local.settings`, which is not committed
 because every machine has Sacred Gold somewhere else. One line:
