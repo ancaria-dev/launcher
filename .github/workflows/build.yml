@@ -24,9 +24,9 @@ jobs:
           go-version: stable
 
       # No sibling checkouts on purpose. The host, the jars and the agent come
-      # from the releases pinned in .dependencies, which is both reproducible
-      # and the same path a person gets when they clone this repository alone.
-      # Bump .dependencies to ship a newer host or a newer agent.
+      # from the releases pinned in dependencies.json, which is both
+      # reproducible and the same path a person gets when they clone this
+      # repository alone. Bump dependencies.json to ship a newer host or agent.
       - name: Build
         shell: pwsh
         run: pwsh tools/build.ps1 -Protocol none -Coderpack none
