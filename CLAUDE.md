@@ -52,8 +52,9 @@ tools/addr.py <mappings>` run inside the coderpack checkout), never taken from a
 checkout. A stale address table is a hook that silently never fires, so the
 payload cannot ship an old one.
 
-Without the siblings the build downloads instead of failing. `.dependencies`
-pins one release tag per repository (`protocol=0.1.0`, `coderpack=0.1.0`) and
+Without the siblings the build downloads instead of failing. `dependencies.json`
+pins one release tag per repository (`{ "path": "ancaria-dev/protocol", "version": "0.99.0" }`
+and the same shape for `coderpack`) and
 `Fetch` pulls `protocol.exe`, `api.jar`, `zygote.jar` and `agent.zip` from
 `https://github.com/ancaria-dev/<repo>/releases/download/v<tag>/<file>`, with no
 token, because these are public releases. `agent.zip` already carries
