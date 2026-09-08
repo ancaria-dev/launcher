@@ -129,7 +129,7 @@ Python 3.11, and Rust 1.98 with the MSVC toolchain and LLVM. The host's
 
 Without those sibling repositories, the script downloads `protocol.exe`,
 `api.jar`, `zygote.jar`, and `agent.zip` from the releases pinned in
-`.dependencies`. The current pins are `protocol=0.1.0` and `coderpack=0.1.0`.
+`dependencies.json`. The current pins are `protocol` and `coderpack`, both `0.99.0`.
 Only Go is required for this path, and `agent.zip` already contains the address
 table. Pass `-Protocol none -Coderpack none` to use downloaded releases even
 when sibling checkouts are present. CI always uses this path.
