@@ -145,8 +145,8 @@ benötigt. `frida-sys` führt bindgen aus und braucht dafür libclang.
 
 Fehlen die benachbarten Repositories, lädt das Skript `protocol.exe`,
 `api.jar`, `zygote.jar` und `agent.zip` aus den Releases herunter, deren
-Versionen in `.dependencies` festgelegt sind. Derzeit sind das
-`protocol=0.1.0` und `coderpack=0.1.0`. In diesem Fall genügt Go, weil
+Versionen in `dependencies.json` festgelegt sind. Derzeit sind das
+`protocol` und `coderpack`, beide `0.99.0`. In diesem Fall genügt Go, weil
 `agent.zip` die Adresstabelle bereits enthält. Mit
 `-Protocol none -Coderpack none` lässt sich dieser Weg auch bei vorhandenen
 Checkouts erzwingen. Die CI verwendet ihn absichtlich bei jedem Push und prüft
