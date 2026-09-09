@@ -13,7 +13,7 @@
 
   /* The launcher's own mark, and the picture a mod without one is drawn with.
      A data URI because the window is loaded from a string and has no origin, so
-     a relative path in here resolves to nothing at all -- the same reason a
+     a relative path in here resolves to nothing at all, the same reason a
      mod's icon reaches the page as one. `ui.page` fills the base64 in from
      ui/web/icon.png; opening this file on its own shows an empty square. */
   --mark: url("data:image/png;base64,/*icon*/");
@@ -22,7 +22,7 @@
 * { box-sizing: border-box; }
 
 /* Everything this page shows and hides is a `hidden` attribute, and the browser
-   grants that nothing more than `display: none` from its own stylesheet -- which
+   grants that nothing more than `display: none` from its own stylesheet, which
    any rule in here outranks.  A dialog with `display: grid` on it is therefore a
    dialog that opens on startup and whose Close button does nothing at all.  One
    rule, and hiding works the same way for every element that ever gets the
@@ -52,7 +52,7 @@ header {
 }
 
 /* The mark is the game's own badge, and it is already round with its own rim,
-   so it gets no border and no plate behind it -- either would read as a second
+   so it gets no border and no plate behind it.  Either would read as a second
    frame drawn around a frame. */
 .mark {
   flex: none;
@@ -548,8 +548,8 @@ aside h2 { margin-bottom: 14px; }
   transition: width 0.2s linear;
 }
 
-/* No total to divide by -- unpacking starts before the entry count is known --
-   so the bar sweeps instead of lying about a percentage. */
+/* No total to divide by, since unpacking starts before the entry count is
+   known, so the bar sweeps instead of lying about a percentage. */
 .bar.sweeping #jdk-fill {
   width: 34%;
   transition: none;

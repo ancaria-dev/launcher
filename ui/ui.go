@@ -3,7 +3,7 @@
 // HTML because the launcher is the one part a player looks at, and CSS is the
 // cheapest way to make it look like something rather than a dialog from 1998.
 // go-webview2 is pure Go, so this still builds with `go build` and ships as one
-// file; the WebView2 runtime it drives is part of Windows 10 and 11.
+// file.  The WebView2 runtime it drives is part of Windows 10 and 11.
 package ui
 
 import (
@@ -94,7 +94,7 @@ type Store struct {
 // and whether a console is wanted.  offHooks is named rather than counted
 // because that is what the host's --no-hook takes.
 //
-// The same shape serves both callbacks -- pressing Play is remembering plus
+// The same shape serves both callbacks: pressing Play is remembering plus
 // starting a game, and writing that as two types would only invite them to
 // drift apart.
 type Choice func(enabled, offHooks []string, flags string, debug bool)
@@ -117,7 +117,7 @@ func Run(state State, remember, play Choice, jdk Java, store Store) {
 			Title: "Sacred Mod Loader",
 			// The icon the window and the taskbar draw, out of the executable's
 			// own resources. `tools/rsrc` writes that resource and gives the
-			// group this id; with no .syso linked in, LoadImage finds nothing
+			// group this id.  With no .syso linked in, LoadImage finds nothing
 			// and the window falls back to the system default rather than
 			// failing to open.
 			IconId: iconResource,
@@ -205,7 +205,7 @@ const (
 )
 
 // The handle comes back from the view as an unsafe.Pointer, which is what a
-// HWND is on the other side of that API; ShowWindow wants it as a uintptr.
+// HWND is on the other side of that API.  ShowWindow wants it as a uintptr.
 func show(window unsafe.Pointer, visible bool) {
 	command := uintptr(swHide)
 	if visible {

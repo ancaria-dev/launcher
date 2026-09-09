@@ -23,7 +23,7 @@ const (
 // awareOfDPI opts the process in, newest call first.  Each of these arrived in
 // a different Windows, and the older ones are worse but still sharp: v2 in
 // 1703, the shcore call in 8.1, and the blunt system-wide one before that.
-// Nothing here is fatal -- a launcher that cannot ask is a launcher that looks
+// Nothing here is fatal.  A launcher that cannot ask is a launcher that looks
 // like it did yesterday.
 func awareOfDPI() {
 	// BOOL: non-zero is success.
@@ -72,7 +72,7 @@ func dpi() uint {
 }
 
 // call runs a proc that may not exist on this Windows, returning its value and
-// whether it was there at all -- what counts as success differs per call, so
+// whether it was there at all.  What counts as success differs per call, so
 // that judgement stays with the caller.  LazyProc.Call panics on a missing
 // export, so Find comes first.
 func call(proc *syscall.LazyProc, args ...uintptr) (uintptr, bool) {

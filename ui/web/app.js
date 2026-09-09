@@ -1,5 +1,5 @@
 // The page is a view over what Go hands across.  It keeps no state of its own
-// beyond the checkboxes -- which mods are ticked and which hooks are off --
+// beyond the checkboxes (which mods are ticked and which hooks are off)
 // because everything else has one owner on the other side.
 
 let hooks = [];
@@ -59,7 +59,7 @@ function render() {
     const row = document.createElement('li');
     // A mod built against another version of the API is shown and cannot be
     // switched on. Hiding it would get us a bug report about a mod that
-    // vanished; this way the player sees it and reads why.
+    // vanished.  This way the player sees it and reads why.
     row.className = mod.supported ? (on ? 'on' : '') : 'unsupported';
 
     const box = document.createElement('input');
@@ -206,7 +206,7 @@ function renderHooks() {
     const title = document.createElement('h3');
     title.textContent = group.module;
     // A module is the unit a crash usually gets narrowed to first, so its name
-    // turns the whole group on or off -- all on unless it already is.
+    // turns the whole group on or off: all on unless it already is.
     title.addEventListener('click', () => {
       const turnOn = group.hooks.some(h => !h.enabled);
       group.hooks.forEach(h => { h.enabled = turnOn; });
@@ -229,7 +229,7 @@ function renderHooks() {
       name.textContent = hook.name;
 
       chip.addEventListener('click', event => {
-        // The label already forwards the click to its own checkbox; without
+        // The label already forwards the click to its own checkbox.  Without
         // this the box would end up back where it started.
         event.preventDefault();
         hook.enabled = !hook.enabled;
@@ -246,9 +246,9 @@ function renderHooks() {
 }
 
 // The game in this folder against the one every address in the loader was found
-// in. A player who has the expected build sees nothing; anyone else is told
+// in. A player who has the expected build sees nothing. Anyone else is told
 // which is which while they can still do something about it, and Play is left
-// alone -- the loader attaches to an unknown build rather than refusing it.
+// alone, and the loader attaches to an unknown build rather than refusing it.
 function showBuild(build) {
   if (!build || !build.exe || build.matches) {
     return;
@@ -267,7 +267,7 @@ function showBuild(build) {
 
 // --- Java ----------------------------------------------------------------
 // The one part of this page that changes while it is open, and the one part
-// that talks to the network. Go does the talking; the page asks it to start
+// that talks to the network. Go does the talking. The page asks it to start
 // something and then polls, because a binding that blocks blocks the window it
 // is drawing the progress bar in.
 
