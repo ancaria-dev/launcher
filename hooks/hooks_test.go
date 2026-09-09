@@ -1,29 +1,45 @@
 package hooks
 
 import (
-	"path/filepath"
+	"os"
 	"testing"
 )
 
-// The scanner reads the agent by pattern rather than from a list, so the thing
-// worth testing is that the pattern still sees every module that installs
-// something.  A site it misses is a site nobody can switch off.
-func TestScanFindsEveryModule(t *testing.T) {
-	// The staged payload rather than the coderpack checkout: this is the agent
-	// that ships inside the executable, so the pair being tested is the pair a
-	// player gets.
-	const agent = "../install/payload/agent"
-	// The directory itself is tracked and therefore always there.  What a
-	// clean checkout is missing is the scripts inside it. Stat would pass on
-	// the empty folder and the test would fail as "no hooks found" instead of
-	// skipping, which reads like a broken scanner rather than an absent build.
-	staged, err := filepath.Glob(filepath.Join(agent, "*.js"))
-	if err != nil || len(staged) == 0 {
+func TestParseKeepsOnlyRowsWithSomethingInThem(t *testing.T) {
+	groups := parse([]byte(`[
+		{"module":"core","hooks":["heroCapture"]},
+		{"module":"level","hooks":[]},
+		{"module":"","hooks":["orphan"]},
+		{"module":"gold","hooks":["goldDelta"]}
+	]`))
+	if len(groups) != 2 {
+		t.Fatalf("expected two rows, got %v", groups)
+	}
+	if groups[0].Module != "core" || groups[1].Module != "gold" {
+		t.Errorf("load order is not preserved: %v", groups)
+	}
+}
+
+func TestParseSurvivesRubbish(t *testing.T) {
+	for _, data := range []string{"", "not json", "{}", "null"} {
+		if groups := parse([]byte(data)); len(groups) != 0 {
+			t.Errorf("%q produced %v", data, groups)
+		}
+	}
+}
+
+// The pair being tested is the pair a player gets: the host that ships inside
+// this executable, asked the way the launcher asks it. A site the host does not
+// name is a site nobody can switch off, so what matters is that every module
+// that installs something is still in the answer.
+func TestTheStagedHostNamesEveryModule(t *testing.T) {
+	const exe = "../install/payload/protocol.exe"
+	if _, err := os.Stat(exe); err != nil {
 		t.Skip("no staged payload; run tools/build.ps1 first")
 	}
-	groups := Scan(agent)
+	groups := Ask(exe)
 	if len(groups) == 0 {
-		t.Fatal("no hooks found; the agent sources moved or the pattern broke")
+		t.Fatal("the host named no hooks; the agent moved or --hooks broke")
 	}
 
 	found := map[string][]string{}
@@ -33,7 +49,7 @@ func TestScanFindsEveryModule(t *testing.T) {
 	for _, want := range []struct{ module, hook string }{
 		{"core", "heroCapture"},
 		{"session", "worldLoad"},
-		{"health", "hpDamage"},   // installed through a wrapper, not hook()
+		{"health", "hpDamage"}, // installed through a wrapper, not hook()
 		{"position", "posCamera"},
 		{"gold", "goldDelta"},
 		{"exp", "expWrite"},

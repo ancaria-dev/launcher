@@ -73,7 +73,7 @@ func main() {
 		Debug:  settings.Debug,
 		Sealed: secret.Works(),
 	}
-	for _, group := range hooks.Scan(filepath.Join(found.LoaderDir(), "agent")) {
+	for _, group := range hooks.Ask(filepath.Join(found.LoaderDir(), "protocol.exe")) {
 		row := ui.HookGroup{Module: group.Module}
 		for _, name := range group.Hooks {
 			row.Hooks = append(row.Hooks, ui.HookRow{

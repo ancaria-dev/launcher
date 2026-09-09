@@ -1,24 +1,24 @@
-// Package hooks lists the sites the agent will attach to, read off the agent
-// itself.
+// Package hooks lists the sites the agent will attach to, asked of the host.
 //
 // Every site is installed through one helper that takes its own name first and
 // its address second, `hook("goldDelta", RVA.goldDelta, ...)`, and the host
-// already accepts `--no-hook goldDelta`.  So the list a player sees comes from
-// the scripts in the game folder rather than from a table kept beside them: a
-// table would be one more thing to forget, and a hook missing from the list is
-// a hook nobody can turn off.
+// already accepts `--no-hook goldDelta`. So the list a player sees is read out
+// of the agent rather than kept in a table beside it: a table would be one more
+// thing to forget, and a hook missing from the list is a hook nobody can turn
+// off.
 //
-// This reads the copy in the game folder, not the embedded payload, because
-// that is the copy the host loads, including one somebody edited by hand
-// between two runs.
+// The agent lives inside `protocol.exe` now, minified, so the reading is done
+// where the agent is. `protocol.exe --hooks` prints the manifest its build
+// wrote from the sources before minifying them, and this asks the copy in the
+// game folder, because that is the copy that will be loaded.
 package hooks
 
 import (
-	"os"
-	"path/filepath"
-	"regexp"
-	"sort"
-	"strings"
+	"context"
+	"encoding/json"
+	"os/exec"
+	"syscall"
+	"time"
 )
 
 // Group is one agent module and the sites it installs.
@@ -27,53 +27,40 @@ type Group struct {
 	Hooks  []string `json:"hooks"`
 }
 
-// site matches any call whose first argument is a name and whose second is an
-// address out of the generated table.  Written this way rather than as a list
-// of helper names so that a new wrapper (health already has one) does not
-// quietly drop its hooks out of the list.
-var site = regexp.MustCompile(`\b\w+\(\s*"([A-Za-z_][A-Za-z0-9_]*)"\s*,\s*RVA\.`)
+// Ask runs the host for its manifest. An empty list is the honest answer to
+// every failure here: an older protocol.exe that does not know the flag, one
+// that cannot be started, anything. The page then shows no hooks rather than a
+// list somebody could switch off in the belief it meant something.
+func Ask(exe string) []Group {
+	// The window is not drawn yet and the host answers immediately, but a
+	// launcher that never opens because a child process is stuck is worse than
+	// a launcher with an empty hooks block.
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-// Scan reads <coderpack>/agent in load order, which is the order the file names
-// already encode.
-func Scan(dir string) []Group {
-	paths, err := filepath.Glob(filepath.Join(dir, "*.js"))
+	cmd := exec.CommandContext(ctx, exe, "--hooks")
+	// No console window: this runs while the player is looking at the desktop.
+	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	out, err := cmd.Output()
 	if err != nil {
 		return nil
 	}
-	sort.Strings(paths)
-
-	groups := make([]Group, 0, len(paths))
-	for _, path := range paths {
-		found := read(path)
-		if len(found) == 0 {
-			continue
-		}
-		groups = append(groups, Group{Module: module(path), Hooks: found})
-	}
-	return groups
+	return parse(out)
 }
 
-func read(path string) []string {
-	data, err := os.ReadFile(path)
-	if err != nil {
+func parse(data []byte) []Group {
+	var groups []Group
+	if err := json.Unmarshal(data, &groups); err != nil {
 		return nil
 	}
-	seen := map[string]bool{}
-	var names []string
-	for _, match := range site.FindAllStringSubmatch(string(data), -1) {
-		name := match[1]
-		if seen[name] {
+	// A module with no sites has no row, and neither has a row with no module:
+	// both would draw an empty block with nothing in it to switch.
+	kept := make([]Group, 0, len(groups))
+	for _, group := range groups {
+		if group.Module == "" || len(group.Hooks) == 0 {
 			continue
 		}
-		seen[name] = true
-		names = append(names, name)
+		kept = append(kept, group)
 	}
-	return names
-}
-
-// module is the file name without its ordering prefix: 50-health.js is health,
-// the same name the host's --skip takes.
-func module(path string) string {
-	name := strings.TrimSuffix(filepath.Base(path), ".js")
-	return strings.TrimLeft(name, "0123456789-")
+	return kept
 }
