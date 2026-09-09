@@ -148,8 +148,8 @@ benötigt. `frida-sys` führt bindgen aus und braucht dafür libclang.
 
 Fehlen die benachbarten Repositories, lädt das Skript `protocol.exe`,
 `api.jar` und `zygote.jar` aus den Releases herunter, deren Versionen in
-`dependencies.json` festgelegt sind. Derzeit sind das `protocol` und
-`coderpack`, beide `0.99.0`. In diesem Fall genügt Go: Der Agent wird nicht
+`dependencies.json` festgelegt sind. Derzeit sind das `protocol` mit `0.100.0`
+und `coderpack` mit `0.99.0`. In diesem Fall genügt Go: Der Agent wird nicht
 gesondert geladen, denn sein JavaScript steckt samt Adresstabelle minifiziert
 in `protocol.exe`. In einer heruntergeladenen `protocol.exe` ist der Agent des
 coderpack-Releases enthalten, das deren eigener Build festgelegt hat; lag ein
@@ -184,7 +184,7 @@ Agent-Skripte ebenso wenig: Stattdessen fragt das Skript den abgelegten Host mit
 hat keinen Agenten in sich. Anschließend bettet `go build` den Payload und die
 Windows-Ressourcen in `dist/Sacred Mod Loader.exe` ein.
 
-Die aktuelle Versionsnummer `0.1.20` steht in `.version`. An ihrer Kopie im
+Die aktuelle Versionsnummer `0.100.0` steht in `.version`. An ihrer Kopie im
 Spielordner erkennt der Launcher, ob er seine Dateien erneut entpacken muss.
 `-Bump` erhöht vor dem Build den letzten Teil der Versionsnummer.
 
