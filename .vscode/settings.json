@@ -45,7 +45,7 @@
     "javascript.preferences.quoteStyle": "single",
 
     // dist/ is `go build` output. install/payload/ is assembled by
-    // tools/build.ps1 from sibling checkouts -- including a staged copy of
+    // tools/build.ps1 from sibling checkouts, including a staged copy of
     // coderpack's agent, which is 4-space double-quoted Frida JavaScript and
     // would contradict every JS setting above. Hidden rather than merely
     // unsearchable, so nobody edits the staged copy instead of the source.

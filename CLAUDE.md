@@ -242,7 +242,7 @@ release contains `dist/Sacred Mod Loader.exe` and creates that tag. `-Bump`
 raises the number, and raising it is what makes a new release eligible.
 `tools/version.ps1` does the same edit directly: no argument prints the
 current version, `pwsh tools/version.ps1 0.99.1` writes a specific one. It
-never touches `dependencies.json` -- that pins `protocol` and `coderpack`,
+never touches `dependencies.json`, which pins `protocol` and `coderpack`,
 not this repository.
 
 `install.ps1` reads the game path from `.local.settings`, which is not committed
