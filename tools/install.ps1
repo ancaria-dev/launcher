@@ -29,7 +29,7 @@ $sacred = (Get-Content $settings |
 if (-not $sacred) { throw "No `sacred=` line found in .local.settings" }
 $sacred = $sacred.Trim().Trim('"')
 # The same three names game/exe.go looks for, in the same order. PowerShell
-# cannot read that list, so this is the one place it is written twice; keep
+# cannot read that list, so this is the one place it is written twice.  Keep
 # the two in step.
 $executables = 'pureHD.exe', 'Sacred.exe', 'Game.exe'
 # -Path is case-insensitive on Windows, which is the point: an install that

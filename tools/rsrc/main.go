@@ -35,9 +35,9 @@ import (
 	"unicode/utf16"
 )
 
-// The resource types written here.  RT_ICON is one image; RT_GROUP_ICON is the
-// directory over them, and it is the one a caller asks for by id -- Windows then
-// picks whichever image fits the size it was asked to draw.  RT_VERSION is the
+// The resource types written here.  RT_ICON is one image.  RT_GROUP_ICON is
+// the directory over them, and it is the one a caller asks for by id.  Windows
+// then picks whichever image fits the size it was asked to draw.  RT_VERSION is the
 // version block.
 const (
 	typeIcon      = 3
@@ -46,7 +46,7 @@ const (
 )
 
 // GroupID is the id of the icon group, and the number ui.Run passes as IconId.
-// One icon, so 1; the images under it get 1..n of their own, in the RT_ICON
+// One icon, so 1.  The images under it get 1..n of their own, in the RT_ICON
 // space, which is a different space entirely.  VersionID is 1 for the same
 // reason, in a third space: GetFileVersionInfo looks for exactly that one.
 const (
@@ -202,9 +202,9 @@ func group(images []image) []byte {
 	_ = binary.Write(out, binary.LittleEndian, uint16(1))
 	_ = binary.Write(out, binary.LittleEndian, uint16(len(images)))
 	for i, one := range images {
-		// The first eight bytes are the same in both structs -- width, height,
-		// colours, planes, bit count -- and everything after them differs. An
-		// ICONDIRENTRY is sixteen bytes and ends in a file offset; a
+		// The first eight bytes are the same in both structs (width, height,
+		// colours, planes, bit count) and everything after them differs. An
+		// ICONDIRENTRY is sixteen bytes and ends in a file offset. A
 		// GRPICONDIRENTRY is fourteen and ends in a resource id.
 		out.Write(one.head[:8])
 		_ = binary.Write(out, binary.LittleEndian, uint32(len(one.data))) // dwBytesInRes
@@ -218,8 +218,8 @@ func group(images []image) []byte {
 // version builds VS_VERSIONINFO: a tree of length-prefixed nodes, each one a
 // header, a UTF-16 key, and either binary bytes or child nodes, with every part
 // of it padded to a four-byte boundary.  Explorer reads it for the Details tab,
-// and GetFileVersionInfo -- which is what `game.Version` calls on the game's own
-// executable -- reads the fixed block at the top of it.
+// and GetFileVersionInfo, which is what `game.Version` calls on the game's own
+// executable, reads the fixed block at the top of it.
 //
 // The fixed block carries the numbers and the string table carries the text, and
 // the format lets the two disagree. That is exactly the trap `game/exe.go`
@@ -244,7 +244,7 @@ func version(release string) []byte {
 
 	// The language and code page the strings below are in, spelled twice: as the
 	// name of the table, in hex, and as the binary value under VarFileInfo.
-	// 0x0409 is en-US and 0x04B0 is 1200, which is UTF-16 -- and the strings
+	// 0x0409 is en-US and 0x04B0 is 1200, which is UTF-16, and the strings
 	// really are UTF-16, so anything else here is a lie about the bytes.
 	const language, codePage = 0x0409, 0x04B0
 	table := fmt.Sprintf("%04X%04X", language, codePage)
@@ -284,17 +284,17 @@ func version(release string) []byte {
 // measured from the start of the record, and the header is three words of it.
 // Aligning what comes after the key on its own is off by exactly those six
 // bytes: `VS_VERSION_INFO` plus its NUL is thirty-two, which needs two bytes of
-// padding at offset 38 and none at offset 32 -- so the fixed block lands two
+// padding at offset 38 and none at offset 32, so the fixed block lands two
 // bytes early, its signature reads as 0x0000FEEF, and Windows answers every
 // question about the file with an empty string.
 //
-// wLength does not count any padding after the record; the parent adds that
+// wLength does not count any padding after the record.  The parent adds that
 // before whatever follows, which is why nothing here writes a trailing pad.
 func node(key string, value []byte, isText bool, children ...[]byte) []byte {
 	length := len(value)
 	kind := uint16(0)
 	if isText {
-		// Characters, not bytes -- and the terminating NUL counts as one.
+		// Characters, not bytes, and the terminating NUL counts as one.
 		length /= 2
 		kind = 1
 	}
@@ -376,8 +376,8 @@ const (
 	subdir    = 0x80000000
 )
 
-// resources lays the three-level tree Windows expects -- type, then name, then
-// language -- and returns the section's bytes with the offsets of every
+// resources lays the three-level tree Windows expects (type, then name, then
+// language) and returns the section's bytes with the offsets of every
 // OffsetToData field, which are the ones the linker has to turn into RVAs.
 //
 // A loop over whatever it is given rather than three types with their offsets
@@ -385,7 +385,7 @@ const (
 // binary-searches, and one more resource added to a hand-laid tree is a tree
 // that points into the middle of itself.
 func resources(blobs []blob) (section []byte, fixups []uint32) {
-	// Grouped by type, in the order they arrive; the caller keeps them sorted by
+	// Grouped by type, in the order they arrive.  The caller keeps them sorted by
 	// type number because every level of the tree is binary-searched.
 	var kinds []uint32
 	byKind := map[uint32][]int{}

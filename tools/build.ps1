@@ -119,7 +119,7 @@ if (FromSource $Coderpack 'settings.gradle.kts') {
         if ($LASTEXITCODE) { throw 'Gradle build failed' }
         # The address table is generated, never checked in: a stale copy is a
         # hook that silently never fires. The path is passed only when there is
-        # one -- given no argument, addr.py walks its own chain and ends up
+        # one.  Given no argument, addr.py walks its own chain and ends up
         # downloading the registry, which is the whole point of that chain.
         if (Test-Path (Join-Path $Mappings 'mappings.json')) {
             python tools/addr.py $Mappings
@@ -153,7 +153,7 @@ Need "$payload/agent/gen/addr.js" 'the generated address table' | Out-Null
 
 # No mods are staged, deliberately. They come from a repository the launcher
 # reads at run time, so a player picks the ones they want instead of finding
-# somebody else's choices already installed -- and the launcher stops growing by
+# somebody else's choices already installed, and the launcher stops growing by
 # nine megabytes every time a mod packs a UI toolkit. The empty mods/ directory
 # stays in the payload: unpacking it is what creates <game>/mods.
 #

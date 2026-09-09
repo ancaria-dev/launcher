@@ -2,7 +2,7 @@
 
 Nothing here runs during a build.  The two things it writes are checked in --
 `sacred.ico`, which `main.go` turns into the executable's icon resource, and
-`ui/web/icon.png`, which the page carries as a data URI -- because the build has
+`ui/web/icon.png`, which the page carries as a data URI, because the build has
 to work on a machine with only Go on it, and because a picture regenerated on
 every build is a picture nobody can review in a diff.
 

@@ -5,7 +5,7 @@
 .DESCRIPTION
     .version is the only place this number lives. It is not the same thing as
     dependencies.json, which pins the versions of protocol and coderpack this
-    launcher builds against -- bumping this repository's own version says
+    launcher builds against.  Bumping this repository's own version says
     nothing about those, and this script does not touch that file.
 
 .EXAMPLE

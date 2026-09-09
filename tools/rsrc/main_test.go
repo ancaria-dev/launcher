@@ -10,7 +10,7 @@ import (
 // Both failures this file exists for were silent. A version block with its
 // padding measured from the wrong place still links, still shows up in the
 // resource tree at the right type and id, and answers every question Windows
-// asks it with an empty string; a group icon with the wrong stride does the same
+// asks it with an empty string.  A group icon with the wrong stride does the same
 // and leaves the file drawn with the default icon. Neither produces an error
 // anywhere, so the check has to be a reader.
 
@@ -32,7 +32,7 @@ func TestQuad(t *testing.T) {
 }
 
 // The fixed block is what GetFileVersionInfo reads, and it is found by walking
-// past the key and its padding rather than at a fixed offset -- so this is the
+// past the key and its padding rather than at a fixed offset, so this is the
 // one place the padding rule has to be right.
 func TestVersionBlockCarriesTheFixedInfo(t *testing.T) {
 	block := version("0.1.20")
@@ -97,7 +97,7 @@ func record(t *testing.T, block []byte) (length, valueLength, kind int, key stri
 	key = string(utf16.Decode(units))
 
 	// Padding to the next four-byte boundary, measured from the start of the
-	// record -- which is what the writer got wrong the first time.
+	// record, which is what the writer got wrong the first time.
 	at = (at + 3) & ^3
 	size := valueLength
 	if kind == 1 {
