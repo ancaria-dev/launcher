@@ -94,25 +94,16 @@ function FromSource($path, $marker) {
 
 # --- payload --------------------------------------------------------------
 Remove-Item -Recurse -Force $payload -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Path $payload, "$payload/agent" | Out-Null
+New-Item -ItemType Directory -Path $payload | Out-Null
 Set-Content -Path "$payload/.gitkeep" -Value '' -NoNewline
 Set-Content -Path "$payload/VERSION" -Value "$version`n" -NoNewline
 
-# protocol.exe
-if (FromSource $Protocol 'Cargo.toml') {
-    Write-Host '[1/4] protocol (cargo)'
-    Push-Location $Protocol
-    try { cargo build --release; if ($LASTEXITCODE) { throw 'Cargo build failed' } }
-    finally { Pop-Location }
-    Copy-Item (Need "$Protocol/target/release/protocol.exe" 'protocol.exe') $payload
-} else {
-    Write-Host "[1/4] protocol (release $($pinned['protocol']))"
-    Fetch 'protocol' 'protocol.exe' "$payload/protocol.exe"
-}
-
-# api.jar, zygote.jar and the agent, address table included
+# api.jar and zygote.jar, plus the agent the host is built around. Coderpack
+# comes first now: the agent goes inside protocol.exe, so its address table has
+# to exist before cargo runs.
+$agent = $null
 if (FromSource $Coderpack 'settings.gradle.kts') {
-    Write-Host '[2/4] coderpack (gradle)'
+    Write-Host '[1/4] coderpack (gradle)'
     Push-Location $Coderpack
     try {
         & ./gradlew.bat --console=plain jar
@@ -135,21 +126,53 @@ if (FromSource $Coderpack 'settings.gradle.kts') {
                Select-Object -First 1
         Copy-Item (Need $jar.FullName "$part.jar") "$payload/$part.jar"
     }
-    Write-Host '[3/4] agent'
-    Copy-Item -Recurse "$Coderpack/agent/src/*" "$payload/agent"
+    $agent = Need "$Coderpack/agent/src" 'the agent sources'
 } else {
-    Write-Host "[2/4] coderpack (release $($pinned['coderpack']))"
+    Write-Host "[1/4] coderpack (release $($pinned['coderpack']))"
     Fetch 'coderpack' 'api.jar' "$payload/api.jar"
     Fetch 'coderpack' 'zygote.jar' "$payload/zygote.jar"
-    Write-Host '[3/4] agent'
-    $zip = Join-Path ([IO.Path]::GetTempPath()) 'coderpack-agent.zip'
-    Fetch 'coderpack' 'agent.zip' $zip
-    Expand-Archive -Path $zip -DestinationPath "$payload/agent" -Force
-    Remove-Item $zip
+    # No agent.zip: nothing here unpacks JavaScript any more. A downloaded
+    # protocol.exe already carries the agent of the coderpack release its own
+    # build pinned.
 }
-# Either way the table has to be in there, or every hook lands on the wrong
-# address and nothing says so.
-Need "$payload/agent/gen/addr.js" 'the generated address table' | Out-Null
+
+# protocol.exe, with the agent minified inside it
+if (FromSource $Protocol 'Cargo.toml') {
+    Write-Host '[2/4] protocol (cargo)'
+    Push-Location $Protocol
+    try {
+        # Which agent goes in. Without this the host build falls back to its own
+        # sibling and then to the release it pins, and a change made in the
+        # coderpack checkout beside us would not be in the launcher we just
+        # built.
+        if ($agent) { $env:PROTOCOL_AGENT = $agent }
+        cargo build --release
+        if ($LASTEXITCODE) { throw 'Cargo build failed' }
+    }
+    finally {
+        Remove-Item Env:PROTOCOL_AGENT -ErrorAction SilentlyContinue
+        Pop-Location
+    }
+    Copy-Item (Need "$Protocol/target/release/protocol.exe" 'protocol.exe') $payload
+} else {
+    Write-Host "[2/4] protocol (release $($pinned['protocol']))"
+    Fetch 'protocol' 'protocol.exe' "$payload/protocol.exe"
+    if ($agent) {
+        Write-Warning ("protocol was downloaded, so its agent is the one that " +
+                       "release embedded, not the one in $Coderpack.")
+    }
+}
+
+# The agent is not a file in the payload any more, so what is checked is that
+# the host has one: --hooks prints the sites its agent installs, and an empty
+# answer means a host that would attach to nothing and say nothing.
+Write-Host '[3/4] agent'
+$sites = & "$payload/protocol.exe" --hooks
+if ($LASTEXITCODE) { throw 'protocol.exe --hooks failed; the host has no agent in it' }
+$groups = @(ConvertFrom-Json ($sites -join ''))
+if (-not $groups.Count) { throw 'protocol.exe --hooks named no hook sites' }
+Write-Host ("    {0} modules, {1} hook sites" -f $groups.Count,
+            ($groups | ForEach-Object { $_.hooks.Count } | Measure-Object -Sum).Sum)
 
 # No mods are staged, deliberately. They come from a repository the launcher
 # reads at run time, so a player picks the ones they want instead of finding

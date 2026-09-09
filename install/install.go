@@ -85,6 +85,10 @@ func (g *Game) Unpack() (bool, error) {
 	if g.Installed() == Version() {
 		return false, nil
 	}
+	// The agent used to be unpacked here as a folder of scripts. It is inside
+	// protocol.exe now, so what an older install left behind is dead weight,
+	// and dead weight in a game folder is the next person's mystery.
+	_ = os.RemoveAll(filepath.Join(g.Dir, "launcher", "agent"))
 	err := fs.WalkDir(payload, root, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
