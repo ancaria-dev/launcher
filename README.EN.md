@@ -128,11 +128,18 @@ Python 3.11, and Rust 1.98 with the MSVC toolchain and LLVM. The host's
 `frida-sys` dependency runs bindgen, which needs libclang.
 
 Without those sibling repositories, the script downloads `protocol.exe`,
-`api.jar`, `zygote.jar`, and `agent.zip` from the releases pinned in
-`dependencies.json`. The current pins are `protocol` and `coderpack`, both `0.99.0`.
-Only Go is required for this path, and `agent.zip` already contains the address
-table. Pass `-Protocol none -Coderpack none` to use downloaded releases even
+`api.jar`, and `zygote.jar` from the releases pinned in `dependencies.json`.
+The current pins are `protocol` and `coderpack`, both `0.99.0`. Only Go is
+required for this path. There is no agent to download: the agent's JavaScript
+lives inside `protocol.exe`, minified, along with the address table it was built
+with. Pass `-Protocol none -Coderpack none` to use downloaded releases even
 when sibling checkouts are present. CI always uses this path.
+
+A source build takes the two in dependency order: coderpack first, so its
+address table exists, and then the host, which is told through `PROTOCOL_AGENT`
+which agent to build itself around. A downloaded `protocol.exe` carries the
+agent of the coderpack release its own build pinned, which the script says out
+loud when a coderpack checkout was there but unused.
 
 ```powershell
 pwsh tools/build.ps1         # stage the payload, then build the executable
@@ -152,9 +159,11 @@ is not committed. It contains one line:
 sacred=D:\SteamLibrary\steamapps\common\Sacred Gold
 ```
 
-The build clears and recreates `install/payload`, then stages the host, agent
-scripts, `api.jar`, `zygote.jar`, and `VERSION`. It does not stage mod jars.
-`go build` embeds the payload and Windows resources in
+The build clears and recreates `install/payload`, then stages the host,
+`api.jar`, `zygote.jar`, and `VERSION`. It does not stage mod jars, and it no
+longer stages agent scripts: it asks the staged host for its hook sites with
+`protocol.exe --hooks` instead, because a host that names none has no agent in
+it. `go build` embeds the payload and Windows resources in
 `dist/Sacred Mod Loader.exe`.
 
 The current version is `0.1.20` in `.version`. Its copy in the installed payload
@@ -177,7 +186,7 @@ On `master`, CI publishes `dist/Sacred Mod Loader.exe` and creates
 | `install` | Embeds the payload and writes it to the game folder |
 | `mods` | Reads `META-INF/declaration.toml` from each jar without running it, then checks whether the loader supports it |
 | `registry` | Reads mod repositories and installs, updates, or removes mods and icons |
-| `hooks` | Reads attachment site names from the agent scripts in the game folder |
+| `hooks` | Asks the host in the game folder which attachment sites its agent installs |
 | `conf` | Stores the saved choices in `launcher/launcher.json` |
 | `game` | Starts the host followed by the game, then stops them together |
 | `java` | Finds a suitable JDK and downloads one when needed |

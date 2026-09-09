@@ -139,15 +139,21 @@ Sonst kann sich der Frida-Host nicht an den Prozess anhängen.
 
 Für den Build ist Go 1.26 erforderlich. Liegt `protocol` oder `coderpack` neben
 diesem Repository, baut das Skript die jeweilige Komponente aus dem Quellcode
-und lädt die fehlende Komponente herunter. Für einen vollständigen Quell-Build
+und lädt die fehlende Komponente herunter. Die Reihenfolge ist dabei
+festgelegt: zuerst coderpack, damit dessen Adresstabelle vorliegt, dann der
+Host, dem über `PROTOCOL_AGENT` gesagt wird, welchen Agenten er einbetten soll.
+Für einen vollständigen Quell-Build
 werden zusätzlich JDK 21, Python 3.11 und Rust 1.98 mit MSVC-Toolchain und LLVM
 benötigt. `frida-sys` führt bindgen aus und braucht dafür libclang.
 
 Fehlen die benachbarten Repositories, lädt das Skript `protocol.exe`,
-`api.jar`, `zygote.jar` und `agent.zip` aus den Releases herunter, deren
-Versionen in `dependencies.json` festgelegt sind. Derzeit sind das
-`protocol` und `coderpack`, beide `0.99.0`. In diesem Fall genügt Go, weil
-`agent.zip` die Adresstabelle bereits enthält. Mit
+`api.jar` und `zygote.jar` aus den Releases herunter, deren Versionen in
+`dependencies.json` festgelegt sind. Derzeit sind das `protocol` und
+`coderpack`, beide `0.99.0`. In diesem Fall genügt Go: Der Agent wird nicht
+gesondert geladen, denn sein JavaScript steckt samt Adresstabelle minifiziert
+in `protocol.exe`. In einer heruntergeladenen `protocol.exe` ist der Agent des
+coderpack-Releases enthalten, das deren eigener Build festgelegt hat; lag ein
+coderpack-Checkout daneben, sagt das Skript das ausdrücklich. Mit
 `-Protocol none -Coderpack none` lässt sich dieser Weg auch bei vorhandenen
 Checkouts erzwingen. Die CI verwendet ihn absichtlich bei jedem Push und prüft
 damit bei jedem CI-Build, ob sich das Repository eigenständig bauen lässt.
@@ -172,8 +178,10 @@ sacred=D:\SteamLibrary\steamapps\common\Sacred Gold
 ```
 
 Der Build leert `install/payload`, erstellt den Ordner neu und legt dort den
-Host, die Agent-Skripte, `api.jar`, `zygote.jar` und `VERSION` ab. Mods gehören
-nicht zum Payload. Anschließend bettet `go build` den Payload und die
+Host, `api.jar`, `zygote.jar` und `VERSION` ab. Mods gehören nicht zum Payload,
+Agent-Skripte ebenso wenig: Stattdessen fragt das Skript den abgelegten Host mit
+`protocol.exe --hooks` nach seinen Hook-Stellen, denn ein Host, der keine nennt,
+hat keinen Agenten in sich. Anschließend bettet `go build` den Payload und die
 Windows-Ressourcen in `dist/Sacred Mod Loader.exe` ein.
 
 Die aktuelle Versionsnummer `0.1.20` steht in `.version`. An ihrer Kopie im
@@ -196,7 +204,7 @@ Auf `master` veröffentlicht die CI `dist/Sacred Mod Loader.exe` und legt
 | `install` | enthält das eingebettete Payload und entpackt es in den Spielordner |
 | `mods` | liest `META-INF/declaration.toml` aus jeder JAR-Datei, ohne sie auszuführen, und prüft, ob der Loader den Mod unterstützt |
 | `registry` | liest Mod-Repositories und installiert, aktualisiert oder löscht Mods und Bilder |
-| `hooks` | liest die Namen der Hook-Stellen aus den Agent-Skripten im Spielordner |
+| `hooks` | fragt den Host im Spielordner nach den Hook-Stellen seines Agenten |
 | `conf` | verwaltet die zuletzt gewählten Einstellungen in `launcher/launcher.json` |
 | `game` | startet zuerst den Host und danach das Spiel und beendet beide gemeinsam |
 | `java` | findet ein geeignetes JDK und lädt bei Bedarf eines herunter |
