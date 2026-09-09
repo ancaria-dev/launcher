@@ -25,8 +25,8 @@ const iconLimit = 256 << 10
 // for one icon at a time instead of being handed all of them on every poll.
 //
 // The cache is keyed by mod id, not by URL. An id is unique across the list by
-// construction -- two repositories offering one id is a conflict and neither is
-// shown -- and a name that survives is what lets an installed mod keep its icon
+// construction (two repositories offering one id is a conflict and neither is
+// shown) and a name that survives is what lets an installed mod keep its icon
 // on a day the repository it came from is not answering.
 type Icons struct {
 	dir string
@@ -67,7 +67,7 @@ func (i *Icons) Get(id string) string {
 }
 
 // Want fetches an icon that is not cached yet.  Called for every entry after an
-// index arrives; the ones already on disk cost a map lookup and no request.
+// index arrives. The ones already on disk cost a map lookup and no request.
 func (i *Icons) Want(id, url string, head http.Header) {
 	if url == "" {
 		return
@@ -117,7 +117,7 @@ func (i *Icons) file(id string) string {
 }
 
 // encode turns bytes into a data URI, and refuses anything that is not a
-// picture. A repository can put whatever it likes at that path; what the page
+// picture. A repository can put whatever it likes at that path. What the page
 // gets told it is deciding by sniffing the bytes rather than by trusting the
 // name.
 func encode(data []byte) string {

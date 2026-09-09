@@ -23,8 +23,8 @@ type Session struct {
 
 // Start launches the host, then the game.
 //
-// enabled is the mod ids the player ticked; offHooks the agent sites to leave
-// uninstalled; flags go to the game untouched.  output receives everything
+// enabled is the mod ids the player ticked, offHooks the agent sites to leave
+// uninstalled, and flags go to the game untouched.  output receives everything
 // the host prints, which is where the console in debug mode gets its content --
 // and is discarded otherwise.
 //
@@ -55,7 +55,7 @@ func Start(dir, gameDir, javaExe string, enabled, offHooks, flags []string, outp
 	host.Dir = dir
 	host.Stdout = output
 	host.Stderr = output
-	// The host's own console window would flash up over the launcher; its
+	// The host's own console window would flash up over the launcher.  Its
 	// output is already being read here.
 	host.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 	if err := host.Start(); err != nil {
@@ -73,12 +73,12 @@ func Start(dir, gameDir, javaExe string, enabled, offHooks, flags []string, outp
 
 // Wait blocks until the game exits, then stops the host.
 //
-// The host is meant to outlive one game -- it loops, waiting for the process to
-// come back -- which is exactly wrong under a launcher: the player closed the
+// The host is meant to outlive one game.  It loops, waiting for the process to
+// come back, which is exactly wrong under a launcher: the player closed the
 // game to get the launcher back, so the session ends with it.
 func (s *Session) Wait() {
 	_ = s.game.Wait()
-	// A moment for the host to notice the detach and unload cleanly; killing it
+	// A moment for the host to notice the detach and unload cleanly.  Killing it
 	// mid-callback is how the host itself used to fault.
 	time.Sleep(500 * time.Millisecond)
 	if s.host.Process != nil {

@@ -8,8 +8,8 @@
 // Windows already has the right thing for this. DPAPI encrypts with a key
 // derived from the logged-in user's credentials, so the sealed value is useless
 // on another account and on another machine, and nothing has to be stored to
-// unlock it. It is not a vault -- code running as that same user can unseal it
-// too -- but the failure it prevents is the one that actually happens: a
+// unlock it. It is not a vault (code running as that same user can unseal it
+// too) but the failure it prevents is the one that actually happens: a
 // credential travelling somewhere it was never meant to go.
 package secret
 

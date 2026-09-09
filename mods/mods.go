@@ -135,7 +135,7 @@ func (l Loader) Read(path string) (Mod, bool) {
 // a dispatch on a method that is no longer there.
 //
 // A missing `loader` is a pass, and the difference is not an inconsistency. The
-// API contract is what decides whether the code can run at all; the release
+// API contract is what decides whether the code can run at all.  The release
 // number is a mod saying it wants a fix from a particular version, which most
 // mods have no opinion about and should not have to write down.
 func (l Loader) Refuse(api, loader string) string {
@@ -205,7 +205,7 @@ func parse(text string) Mod {
 }
 
 // list splits `["a", "b"]` back into its strings.  The plugin writes the
-// brackets; anything else counts as one name, because a hand-written
+// brackets.  Anything else counts as one name, because a hand-written
 // `conflicts = "other-mod"` means something obvious enough to honour.
 func list(value string) []string {
 	body := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(value), "["), "]")

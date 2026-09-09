@@ -16,8 +16,8 @@ import (
 // rather than one being assumed.
 //
 // This is the only list in the repository.  Everything that has to find the
-// game -- the folder check at startup, the process the launcher spawns --
-// comes through here.
+// game (the folder check at startup, the process the launcher spawns) comes
+// through here.
 var Names = []string{"pureHD.exe", "Sacred.exe", "Game.exe"}
 
 // Find returns the path to the game executable inside dir, or an empty string
@@ -55,7 +55,7 @@ func Missing() string {
 // 2.0.2.28 and its code is somewhere else entirely, so a hook meant for one
 // lands in the middle of an unrelated function in the other.
 //
-// The loader attaches to it anyway rather than refusing -- but the player is
+// The loader attaches to it anyway rather than refusing, but the player is
 // told first, which is what Build is for.
 const Expected = "2.0.2.118"
 
@@ -148,13 +148,13 @@ func Version(exe string) string {
 var versionDLL = syscall.NewLazyDLL("version.dll")
 
 // The backslash VerQueryValue takes as "the whole block", and the magic the
-// fixed part starts with -- a block that does not begin with it is not one.
+// fixed part starts with.  A block that does not begin with it is not one.
 const (
 	rootPath       = `\`
 	fixedSignature = 0xFEEF04BD
 )
 
-// VS_FIXEDFILEINFO.  Only the two version pairs are read; the rest is here so
+// VS_FIXEDFILEINFO.  Only the two version pairs are read.  The rest is here so
 // the struct is the size Windows says it is, which is what the length check
 // above compares against.
 type fixedFileInfo struct {

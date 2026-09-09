@@ -24,7 +24,7 @@ type Index struct {
 
 // Entry is one mod on offer.  Everything down to Website is copied out of the
 // descriptor inside the jar by whoever generated the index, so it says the same
-// thing the jar will say once it is downloaded -- and Install checks that it
+// thing the jar will say once it is downloaded, and Install checks that it
 // does.
 type Entry struct {
 	ID          string   `json:"id"`
@@ -60,7 +60,7 @@ type Entry struct {
 // Parse reads an index and drops the entries it cannot trust.
 //
 // A repository is somebody else's file. One malformed entry is theirs to fix
-// and no reason to hide the rest, so a bad entry is left out and counted; a
+// and no reason to hide the rest, so a bad entry is left out and counted. A
 // malformed file, or one from a layout this launcher does not know, is an error
 // with nothing usable in it.
 func Parse(data []byte) (*Index, int, error) {

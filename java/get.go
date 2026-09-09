@@ -43,7 +43,7 @@ func Download(loaderDir string, pkg Pkg, link Link, progress func(done, total in
 
 	total := response.ContentLength
 	if total <= 0 {
-		// Some mirrors send no length; the API already told us the size.
+		// Some mirrors send no length.  The API already told us the size.
 		total = pkg.Size
 	}
 
@@ -70,8 +70,8 @@ func Download(loaderDir string, pkg Pkg, link Link, progress func(done, total in
 }
 
 // check compares what arrived against what the index published.  A digest the
-// index does not have is not a reason to refuse the file -- there is nothing to
-// compare it with -- but a digest that disagrees is: the bytes are not the ones
+// index does not have is not a reason to refuse the file (there is nothing to
+// compare it with) but a digest that disagrees is: the bytes are not the ones
 // the vendor signed off, and unpacking them is how a mod loader turns into a
 // way of running somebody else's code.
 func check(link Link, sum []byte) error {

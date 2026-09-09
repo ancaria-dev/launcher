@@ -1,7 +1,7 @@
 // Package java finds a JDK for the mod loader, and fetches one when the machine
 // has none.
 //
-// The loader's whole Java side -- the zygote and every mod in it -- runs in a
+// The loader's whole Java side, the zygote and every mod in it, runs in a
 // JVM the host starts as a child process.  No JDK, no mods: the game still
 // launches and nothing at all happens, which is the confusing failure this
 // package exists to turn into an explained one.
@@ -21,7 +21,7 @@ import (
 )
 
 // Minimum is the oldest Java the zygote is built for.  Anything older is not a
-// smaller problem than no Java at all -- the class files simply will not load.
+// smaller problem than no Java at all: the class files simply will not load.
 const Minimum = 21
 
 // Where a JDK came from, as the player is told it.  Naming the source is the
@@ -94,7 +94,7 @@ func candidates(loaderDir string) []Found {
 }
 
 // local is the JDK the launcher unpacked.  Extraction strips the archive's own
-// top directory, so `java/bin/java.exe` is the normal shape -- but a copy
+// top directory, so `java/bin/java.exe` is the normal shape, but a copy
 // somebody unzipped by hand keeps it, and refusing that would be pedantry.
 func local(dir string) string {
 	if isJDK(dir) {
@@ -120,8 +120,8 @@ func isJDK(home string) bool {
 	return err == nil && !info.IsDir()
 }
 
-// The launcher is a Windows program throughout -- everything around it spells
-// the game and the host with .exe -- so the JDK is spelled the same way.
+// The launcher is a Windows program throughout.  Everything around it spells
+// the game and the host with .exe, so the JDK is spelled the same way.
 func exeIn(home string) string {
 	return filepath.Join(home, "bin", "java.exe")
 }

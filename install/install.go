@@ -2,7 +2,7 @@
 // out in the game folder.
 //
 // The player copies one file into Sacred Gold and runs it. Everything the
-// loader needs -- the host, the agent scripts, the jars, the stock mods -- is
+// loader needs (the host, the agent scripts, the jars, the stock mods) is
 // embedded here and written out on first run, and again whenever the version
 // changes. Nothing has to be installed in the right order, and there is no
 // second file to forget.
@@ -71,12 +71,12 @@ func (g *Game) Installed() string {
 // Unpack writes the payload out when the installed version is not this one.
 //
 // Mod jars are overwritten like everything else, but files a mod created next
-// to them -- a rune table somebody filled in by hand -- are not touched: only
+// to them, a rune table somebody filled in by hand, are not touched: only
 // what is in the payload is written, never a whole directory replaced.
 func (g *Game) Unpack() (bool, error) {
 	// Made here rather than carried in the payload. This launcher ships no mod,
 	// so payload/mods is empty, and an empty directory does not survive
-	// `go:embed` -- there is nothing in the embedded tree to walk. The folder
+	// `go:embed`: there is nothing in the embedded tree to walk. The folder
 	// still has to exist: it is where the loader looks and where the game folder
 	// tells a player their mods live, whether or not any have been installed.
 	if err := os.MkdirAll(g.ModsDir(), 0o755); err != nil {
@@ -106,7 +106,7 @@ func (g *Game) Unpack() (bool, error) {
 			return os.MkdirAll(target, 0o755)
 		}
 		// The payload is a staged copy of a build directory and picks up the
-		// odd .gitkeep on the way; a game folder should not collect them.
+		// odd .gitkeep on the way.  A game folder should not collect them.
 		if strings.HasPrefix(entry.Name(), ".") {
 			return nil
 		}

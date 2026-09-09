@@ -79,7 +79,7 @@ func TestRanges(t *testing.T) {
 		{"[1,2),[3,4)", "3.0", true},
 		{"[1,2),[3,4)", "2.5", false},
 		{"[1,2), [3,4)", "3.9", true},
-		// Nothing said allows everything; nothing readable allows nothing.
+		// Nothing said allows everything. Nothing readable allows nothing.
 		{"", "1", true},
 		{"[1,2)", "", false},
 		{"[1,2)", "x", false},

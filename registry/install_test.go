@@ -183,7 +183,7 @@ func TestInstallRefusesBytesThatAreNotWhatWasPublished(t *testing.T) {
 
 func TestInstallRefusesAJarThatIsNotTheModItWasOfferedAs(t *testing.T) {
 	server := serve(t)
-	// The index offers a-mod; the jar behind it says it is something else.
+	// The index offers a-mod. The jar behind it says it is something else.
 	jar := modJar(t, "something-else", "1.0.0", "1")
 	server.files["/jars/a-mod.jar"] = jar
 	server.put(IndexFile, index(server, entry(server, "a-mod", "1.0.0", jar, sum(jar))))

@@ -67,7 +67,7 @@ func Resolve(clone, token string) (Remote, *Index, error) {
 // different lies. The hash says the bytes are the ones the index published. The
 // descriptor inside says the jar is the mod it was offered as, rather than
 // something else published under a trusted name. Its version ranges say the
-// loader will actually run it -- checked against the jar rather than against
+// loader will actually run it, checked against the jar rather than against
 // the index entry, because the index is somebody else's file and the descriptor
 // is the thing the loader itself will read. A download that fails any of them
 // leaves nothing behind.
@@ -128,7 +128,7 @@ func Remove(loader mods.Loader, modsDir, id string) error {
 // throwing away what it was.
 //
 // Both halves matter. The player is told what to do about it, and Resolve is
-// still able to see a 404 underneath and go on to the next URL shape -- which is
+// still able to see a 404 underneath and go on to the next URL shape, which is
 // what a plain rewritten message would have quietly stopped it doing.
 func explain(remote Remote, err error) error {
 	var status *fetch.Status

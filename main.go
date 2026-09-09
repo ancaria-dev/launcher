@@ -1,6 +1,6 @@
 // Sacred Mod Loader: one file a player drops into their Sacred Gold folder.
 //
-// Everything else -- the host, the agent, the loader jars, the stock mods --
+// Everything else (the host, the agent, the loader jars, the stock mods)
 // travels inside this executable and is written into the game folder on first
 // run. What a player has to know is "put this next to the game and run it".
 //
@@ -195,7 +195,7 @@ func hasFlag(name string) bool {
 
 // fail says what went wrong somewhere a player will see it.  The launcher is
 // built as a GUI application, so without a console there is nothing to print
-// to -- and a silent exit reads as "it does not work" rather than as a fixable
+// to, and a silent exit reads as "it does not work" rather than as a fixable
 // mistake.
 func fail(message string) {
 	messageBox(message, "Sacred Mod Loader")

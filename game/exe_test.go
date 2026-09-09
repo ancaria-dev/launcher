@@ -36,8 +36,8 @@ func write(t *testing.T, dir, name string) {
 
 // The version is what decides, not the name: the folder a player actually has
 // may hold a renamed copy of the wrapper or the stock game under a name we try
-// second.  A file with no version resource -- which is what an empty stand-in
-// is -- is not the expected build either.
+// second.  A file with no version resource, which is what an empty stand-in
+// is, is not the expected build either.
 func TestDescribeNamesBothBuilds(t *testing.T) {
 	dir := t.TempDir()
 	write(t, dir, "pureHD.exe")

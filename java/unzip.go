@@ -16,7 +16,7 @@ import (
 // named their folder.
 //
 // progress is called with bytes written and the total the archive says it
-// holds; it may be nil.
+// holds.  It may be nil.
 func Unzip(archive, dir string, progress func(done, total int64)) error {
 	reader, err := zip.OpenReader(archive)
 	if err != nil {
@@ -99,7 +99,7 @@ func extract(entry *zip.File, where string) (int64, error) {
 //
 // A leading slash is left where it is rather than trimmed off.  Trimming would
 // quietly turn `/windows/system32/…` into a relative path and write it, which
-// is containment by accident; a JDK archive has no absolute names in it, and
+// is containment by accident.  A JDK archive has no absolute names in it, and
 // one that does is worth stopping on.
 func target(name, strip string) (string, bool) {
 	name = path.Clean(strings.ReplaceAll(name, `\`, "/"))
@@ -117,7 +117,7 @@ func target(name, strip string) (string, bool) {
 
 // commonRoot is the single directory every entry sits inside, or an empty
 // string when there is not exactly one.  Vendors do not agree on what to call
-// it -- `jdk-25.0.4` from Oracle, `jdk-25.0.4.1+1` from Temurin -- so it is
+// it (`jdk-25.0.4` from Oracle, `jdk-25.0.4.1+1` from Temurin) so it is
 // found rather than guessed, and an archive that is already flat is left alone.
 func commonRoot(entries []*zip.File) string {
 	root := ""

@@ -176,7 +176,7 @@ func (w *Work) Load() {
 		for _, remote := range remotes {
 			w.note(Progress{Stage: StageIndex, Note: remote.Label()})
 
-			// A remote with no shape worked out yet -- the official one on a
+			// A remote with no shape worked out yet: the official one on a
 			// fresh install, or one saved by a launcher that read it a
 			// different way. Resolving is the same work as loading plus the
 			// misses before it, and the answer is kept.

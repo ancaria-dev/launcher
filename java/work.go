@@ -9,7 +9,7 @@ import (
 
 // The page cannot wait for any of this.  A WebView2 binding runs on the thread
 // that pumps the window's messages, so a call that spends thirty seconds
-// downloading is thirty seconds of a frozen window -- which is exactly what a
+// downloading is thirty seconds of a frozen window, which is exactly what a
 // progress bar exists to prevent.  Everything slow therefore runs in a
 // goroutine and the page polls Snapshot for what it should draw.
 
@@ -62,9 +62,10 @@ type Work struct {
 	busy     bool
 }
 
-// New looks for a JDK straight away -- reading a `release` file costs nothing
-// and the answer belongs on the page before the player asks a question about
-// it -- and clears anything an interrupted download left behind.
+// New looks for a JDK straight away, since reading a `release` file costs
+// nothing and the answer belongs on the page before the player asks a
+// question about it.  It also clears anything an interrupted download left
+// behind.
 func New(loaderDir string) *Work {
 	Sweep(loaderDir)
 	return &Work{dir: loaderDir, java: Find(loaderDir)}
@@ -115,7 +116,7 @@ func (w *Work) Load() {
 }
 
 // Get downloads one JDK and makes it the one the loader uses.  It returns
-// immediately; the page follows along through Snapshot.
+// immediately.  The page follows along through Snapshot.
 func (w *Work) Get(vendor string, major int) {
 	w.mu.Lock()
 	if w.busy {

@@ -68,7 +68,7 @@ func TestDownloadDeletesAFileThatDoesNot(t *testing.T) {
 
 // Not every distribution publishes a digest.  There is nothing to compare
 // against, and refusing on that account would mean refusing perfectly good
-// vendors; a digest that disagrees is the case worth stopping for.
+// vendors.  A digest that disagrees is the case worth stopping for.
 func TestDownloadAcceptsAPackageWithNoPublishedChecksum(t *testing.T) {
 	body := []byte("no digest for this one")
 	if _, err := Download(t.TempDir(), Pkg{Filename: "jdk.zip"},

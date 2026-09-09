@@ -16,7 +16,7 @@ import (
 
 // Conf is small on purpose: everything in it is something a player set.
 type Conf struct {
-	// Enabled is nil the first time, which means "everything" -- a fresh
+	// Enabled is nil the first time, which means "everything", since a fresh
 	// install should do something rather than nothing.
 	Enabled []string `json:"enabled"`
 	// Flags are passed to the game executable as-is.
@@ -24,7 +24,7 @@ type Conf struct {
 	// Debug keeps the console open with the host's output in it.
 	Debug bool `json:"debug"`
 	// OffHooks names agent hook sites to leave uninstalled.  Stored the way
-	// round it is -- what is OFF, not what is on -- so that a hook added in a
+	// round it is (what is OFF, not what is on) so that a hook added in a
 	// later version arrives switched on rather than silently missing.
 	OffHooks []string `json:"offHooks"`
 
@@ -49,7 +49,7 @@ func Load(dir string) *Conf {
 	return conf
 }
 
-// Save writes the file, ignoring a failure -- losing a preference is not worth
+// Save writes the file, ignoring a failure.  Losing a preference is not worth
 // stopping a player from starting their game.
 func (c *Conf) Save() {
 	data, err := json.MarshalIndent(c, "", "  ")

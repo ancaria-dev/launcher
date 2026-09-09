@@ -38,8 +38,8 @@ func archiveOf(t *testing.T, entries map[string]string) string {
 	return path
 }
 
-// Vendors do not agree on what to call the folder inside the archive -- Oracle
-// ships jdk-25.0.4, Temurin ships jdk-25.0.4.1+1 -- so it is found and dropped
+// Vendors do not agree on what to call the folder inside the archive: Oracle
+// ships jdk-25.0.4, Temurin ships jdk-25.0.4.1+1, so it is found and dropped
 // rather than named, and Find only ever has to look at java/bin/java.exe.
 func TestUnzipDropsTheArchivesOwnRoot(t *testing.T) {
 	archive := archiveOf(t, map[string]string{

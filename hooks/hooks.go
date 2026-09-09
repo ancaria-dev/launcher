@@ -2,14 +2,14 @@
 // itself.
 //
 // Every site is installed through one helper that takes its own name first and
-// its address second -- `hook("goldDelta", RVA.goldDelta, ...)` -- and the host
+// its address second, `hook("goldDelta", RVA.goldDelta, ...)`, and the host
 // already accepts `--no-hook goldDelta`.  So the list a player sees comes from
 // the scripts in the game folder rather than from a table kept beside them: a
 // table would be one more thing to forget, and a hook missing from the list is
 // a hook nobody can turn off.
 //
 // This reads the copy in the game folder, not the embedded payload, because
-// that is the copy the host loads -- including one somebody edited by hand
+// that is the copy the host loads, including one somebody edited by hand
 // between two runs.
 package hooks
 
@@ -29,7 +29,7 @@ type Group struct {
 
 // site matches any call whose first argument is a name and whose second is an
 // address out of the generated table.  Written this way rather than as a list
-// of helper names so that a new wrapper -- health already has one -- does not
+// of helper names so that a new wrapper (health already has one) does not
 // quietly drop its hooks out of the list.
 var site = regexp.MustCompile(`\b\w+\(\s*"([A-Za-z_][A-Za-z0-9_]*)"\s*,\s*RVA\.`)
 

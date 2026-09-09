@@ -7,13 +7,13 @@ import (
 
 // The scanner reads the agent by pattern rather than from a list, so the thing
 // worth testing is that the pattern still sees every module that installs
-// something -- a site it misses is a site nobody can switch off.
+// something.  A site it misses is a site nobody can switch off.
 func TestScanFindsEveryModule(t *testing.T) {
 	// The staged payload rather than the coderpack checkout: this is the agent
 	// that ships inside the executable, so the pair being tested is the pair a
 	// player gets.
 	const agent = "../install/payload/agent"
-	// The directory itself is tracked and therefore always there; what a
+	// The directory itself is tracked and therefore always there.  What a
 	// clean checkout is missing is the scripts inside it. Stat would pass on
 	// the empty folder and the test would fail as "no hooks found" instead of
 	// skipping, which reads like a broken scanner rather than an absent build.

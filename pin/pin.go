@@ -7,7 +7,7 @@
 // one NeoForge writes in a `mods.toml`, so it is a notation somebody has
 // probably already read:
 //
-//	[1,2)        1 or newer, below 2 -- one major, the usual thing to write
+//	[1,2)        1 or newer, below 2 (one major), the usual thing to write
 //	[1.0,)       1.0 or newer, no upper end
 //	(,1.5]       anything up to and including 1.5
 //	[1.2]        that version and nothing else
@@ -19,7 +19,7 @@
 //
 // # One deliberate difference from Maven
 //
-// A bare `1` in Maven is a *soft* requirement -- a recommendation, satisfied by
+// A bare `1` in Maven is a *soft* requirement, a recommendation satisfied by
 // any version at all. That answer is useless here and dangerous: the question
 // this package exists to answer is whether a mod will run, and "any" is the one
 // reply that is never true. A bare version therefore means exactly that version,
@@ -30,7 +30,7 @@
 // Dotted numbers with an optional qualifier after the first `-` or `+`:
 // `1`, `0.1.20`, `2.0.2.118`, `1.0.0-rc1`, `25.0.4.1+1`. Missing parts count as
 // zero, so `1` and `1.0.0` are the same version. A qualifier sorts *before* the
-// version without one, because `1.0.0-rc1` comes before `1.0.0`; two qualifiers
+// version without one, because `1.0.0-rc1` comes before `1.0.0`. Two qualifiers
 // are compared as text, which is not clever and does not pretend to be.
 //
 // Anything that is not that shape is unknown rather than zero, and an unknown
@@ -156,7 +156,7 @@ func ParseRange(text string) (Range, error) {
 		return Range{}, nil
 	}
 	if !strings.ContainsAny(text[:1], "[(") {
-		// A bare version. Exactly that one -- see the note at the top about why
+		// A bare version. Exactly that one. See the note at the top about why
 		// this is not Maven's answer.
 		version := Parse(text)
 		if !version.Known() {
@@ -266,7 +266,7 @@ func (r Range) String() string { return r.text }
 
 // Allows is the whole question for a caller holding two strings: does this
 // version satisfy this range?  A range that cannot be read allows nothing,
-// which is the safe answer -- use ParseRange where the reason matters.
+// which is the safe answer.  Use ParseRange where the reason matters.
 func Allows(rang, version string) bool {
 	parsed, err := ParseRange(rang)
 	if err != nil {

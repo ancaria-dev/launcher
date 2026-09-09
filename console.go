@@ -7,7 +7,7 @@ import (
 )
 
 // The console the launcher opens for itself.  A windowsgui binary has none, so
-// there is nothing to print to until AllocConsole -- and the handles still
+// there is nothing to print to until AllocConsole, and the handles still
 // point at nothing afterwards, which is the part that is easy to forget.
 
 var kernel32 = syscall.NewLazyDLL("kernel32.dll")
@@ -20,8 +20,8 @@ const (
 	// the log seemed to need a keypress to move.
 	quickEdit = 0x0040
 	// And this one has to go with it.  While QuickEdit is on, the console
-	// handles the mouse itself; turn QuickEdit off and leave this set, and the
-	// wheel is delivered to whatever is running instead -- so the window stops
+	// handles the mouse itself.  Turn QuickEdit off and leave this set, and the
+	// wheel is delivered to whatever is running instead, so the window stops
 	// scrolling and looks frozen in a second, quieter way.  Clearing both hands
 	// the mouse back to the console for scrolling, without the selection that
 	// stops the output.

@@ -16,7 +16,7 @@ type Offer struct {
 	Size        int64  `json:"size"`
 
 	// Source is the line under the name, and Remote is the URL that line is
-	// short for -- the one Install is told to fetch from.
+	// short for: the one Install is told to fetch from.
 	Source string `json:"source"`
 	Remote string `json:"remote"`
 
@@ -30,7 +30,7 @@ type Offer struct {
 
 // Known is what a registry has to say about a mod already in the folder.
 type Known struct {
-	// Source is the remote offering it, empty when none does -- a mod somebody
+	// Source is the remote offering it, empty when none does: a mod somebody
 	// built themselves, or a registry that is not answering today.
 	Source string `json:"source"`
 	Remote string `json:"remote"`

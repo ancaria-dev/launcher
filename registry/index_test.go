@@ -157,8 +157,8 @@ func TestMergeKeepsAwayFromWhatIsAlreadyInstalled(t *testing.T) {
 	}
 	offers, known := Merge(here, installed, indexes, []Remote{remote})
 
-	// self-check is installed, so it is not on offer; all-my-runes is refused by
-	// what is installed; old-huge-potions is the only thing left.
+	// self-check is installed, so it is not on offer. all-my-runes is refused by
+	// what is installed, and old-huge-potions is the only thing left.
 	if len(offers) != 1 || offers[0].ID != "old-huge-potions" {
 		t.Fatalf("offered %+v", offers)
 	}

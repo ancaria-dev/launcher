@@ -37,7 +37,7 @@ type Remote struct {
 	// of several URL shapes it speaks.
 	Raw string `json:"raw"`
 
-	// Name comes from the index. Only for the list; the URL is the identity.
+	// Name comes from the index. Only for the list. The URL is the identity.
 	Name string `json:"name"`
 
 	// Token is an access token for a repository that is not public. Sealed on
@@ -68,7 +68,7 @@ func (r Remote) Header() http.Header {
 		return head
 	}
 	head.Set("Authorization", "Bearer "+r.Token)
-	// GitHub's raw host does not take a token at all; its API does, and answers
+	// GitHub's raw host does not take a token at all. Its API does, and answers
 	// with the file itself only when asked to.
 	if strings.Contains(r.Raw, "api.github.com") {
 		head.Set("Accept", "application/vnd.github.raw")

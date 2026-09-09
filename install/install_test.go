@@ -8,7 +8,7 @@ import (
 
 // The mods folder is the one thing about the layout that cannot come out of
 // the payload. This launcher ships no mod, so `payload/mods` is empty, and an
-// empty directory is not in an embedded tree at all -- there is nothing to walk
+// empty directory is not in an embedded tree at all: there is nothing to walk
 // and nothing would be created.
 func TestUnpackAlwaysMakesTheModsFolder(t *testing.T) {
 	dir := t.TempDir()

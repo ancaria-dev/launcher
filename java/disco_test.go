@@ -75,7 +75,7 @@ func TestReadVersions(t *testing.T) {
 }
 
 // The default the page opens on. Oracle's Windows x64 build of 25 answers this
-// query with a package that is directly downloadable -- several distributions
+// query with a package that is directly downloadable.  Several distributions
 // are listed and then want a licence click instead, and this is the check that
 // says which kind Oracle is.
 func TestReadPackages(t *testing.T) {

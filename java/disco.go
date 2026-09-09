@@ -5,7 +5,7 @@
 //
 // Every response is parsed by a `read…` function that takes bytes, so the tests
 // can be run against answers the live service actually gave rather than against
-// ones somebody invented -- a fixture written from the struct only ever proves
+// ones somebody invented.  A fixture written from the struct only ever proves
 // the struct matches the fixture.
 package java
 
@@ -28,7 +28,7 @@ import (
 const API = "https://api.foojay.io/disco/v3.0/"
 
 // Defaults are what the page opens on.  Oracle 25 is directly downloadable for
-// Windows x64 -- checked against the live service, because several
+// Windows x64, checked against the live service, because several
 // distributions are listed and then hand you a licence click instead of a file,
 // and a default nobody can download is worse than a different default.
 const (
@@ -76,7 +76,7 @@ var index = &http.Client{Timeout: 30 * time.Second}
 //
 // A rule rather than a list, so nothing has to be edited here when a new
 // distribution appears.  What the rule leaves out is the GraalVM-derived
-// entries -- a different product with a different reason to exist, where the
+// entries, a different product with a different reason to exist, where the
 // loader wants a plain JDK.
 func Vendors() ([]Vendor, error) {
 	data, err := disco("distributions?include_versions=false&include_synonyms=false")
@@ -231,7 +231,7 @@ func readPackages(data []byte, direct bool) ([]Pkg, error) {
 // Locate turns a package id into a download.
 //
 // The checksum field is often empty with `checksum_uri` pointing at a `.sha256`
-// file beside the archive -- Oracle publishes it that way -- so the digest is
+// file beside the archive (Oracle publishes it that way) so the digest is
 // one more small fetch rather than a field that is simply missing.
 func Locate(id string) (Link, error) {
 	data, err := disco("ids/" + url.PathEscape(id))
@@ -314,7 +314,7 @@ func decode(data []byte, into any) error {
 }
 
 // arch is what foojay calls this machine.  The game is 32-bit and the JVM is
-// not inside it -- the host starts Java as its own process -- so the JDK is
+// not inside it (the host starts Java as its own process) so the JDK is
 // simply the machine's own.
 func arch() string {
 	switch runtime.GOARCH {
