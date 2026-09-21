@@ -228,15 +228,25 @@ partner rather than a rewrite. A player's own remotes live in `conf.Remotes`.
 The official one cannot be removed: a launcher with no repositories is a page
 with nothing on it and no way back.
 
-`Merge` decides what is offered, and its rule about conflicts is blunt on
-purpose. Two mods that rewrite the same thing produce whichever answer the
-loader asked for last, and no player can be expected to know that, so **both
-sides leave the list**. That covers a mod naming another in its descriptor's
-`conflicts`, either side of that pair already being installed, and the same id
-coming from two repositories at once, which is its own ambiguity: there would be
-no saying which one Install meant. A mod already installed is never offered, and
-one whose version differs from the offered one gets an Update button rather than
-a second row.
+`Merge` decides what is offered. **A declared conflict hides nothing.** Two
+mods that rewrite the same thing produce whichever answer the loader asked for
+last, which is worth saying, and `Clash.Sentence` says it in amber under both
+rows: the one that named the other and the one that never said anything, since
+the combination is what misbehaves and half of it would otherwise look
+innocent. Both stay installable. What a mod's author believes about somebody
+else's mod is an opinion, not a measurement.
+
+This used to hide both sides, and the cost was out of all proportion. One mod
+in the default repository named two others, so a player opening the launcher
+saw one mod out of four, with nothing on the page to say where the rest went.
+Worse, `conflicts` arrives in **somebody else's index**, so an author could
+delete a rival from the catalogue by naming its id.
+
+The one thing still hidden is not a conflict between mods at all: the same id
+offered by two repositories, where there is no saying which file Install
+means and no sentence that resolves it. A mod already installed is not offered
+either, and one whose version differs from the offered one gets an Update
+button rather than a second row.
 
 `Install` performs three independent checks before a jar may remain. Its
 SHA-256 must match the index. The mod ID in its descriptor must match the
@@ -388,6 +398,12 @@ changes, save a fresh response instead of editing a fixture by hand:
   a thing that cannot work, the other is a thing nobody has checked.
 - `--no-hook` is passed only when the list is non-empty. An empty value reaches
   the agent as a list containing one empty name.
+- Never drop a mod from the list because of what another mod said about it.
+  `conflicts` comes out of an index this project did not write, and the only
+  thing it earns is `Clash.Sentence` under both rows. Hiding on that basis
+  costs a player mods that work and hands a hostile index a way to remove a
+  competitor. Refusing to install on that basis is the same mistake with an
+  extra step.
 - Never drop a mod from the list because it is incompatible. `mods.Loader`
   identifies the API contract and launcher release. `Loader.Refuse` measures a
   descriptor's two ranges against it: `api`, the
