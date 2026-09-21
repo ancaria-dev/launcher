@@ -614,6 +614,124 @@ function wireStore() {
   setInterval(storeTick, 500);
 }
 
+// --- updating the launcher -----------------------------------------------
+// The launcher is one file with the whole loader inside it, so upgrading it is
+// downloading one file and starting it. Go does both; this half draws a line
+// in the header and a dialog with a bar in it.
+
+let watchingUpdate = 0;
+// Whether a downloaded launcher is already waiting. Kept here so the link can
+// tell "fetch it" from "it is fetched" without another round trip.
+let updateStaged = false;
+// The check runs once at startup and takes as long as one request to
+// api.github.com. This gives up after a minute rather than polling a launcher
+// somebody left open all evening.
+let checksLeft = 60;
+
+const updateWords = {
+  download: p => p.total
+    ? `Downloading ${size(p.done)} of ${size(p.total)}`
+    : `Downloading ${size(p.done)}`,
+  install: p => p.note,
+  ready: p => p.note,
+};
+
+function showUpdate(view) {
+  updateStaged = view.staged;
+  const line = document.getElementById('update');
+  line.hidden = !view.found;
+  if (!view.found) {
+    return;
+  }
+  document.getElementById('update-what').textContent =
+    `Version ${view.release.version} is available.`;
+  document.getElementById('update-open').textContent =
+    view.staged ? 'Install now' : 'Download & install now';
+}
+
+function showUpdateProgress(view) {
+  const progress = view.progress;
+  const bar = document.getElementById('update-bar');
+  const fill = document.getElementById('update-fill');
+  const note = document.getElementById('update-note');
+  const error = document.getElementById('update-error');
+  const rescue = document.getElementById('update-rescue');
+  const page = document.getElementById('update-page');
+
+  // No way out while bytes are moving, and no way to press the button twice.
+  document.getElementById('update-close').hidden = view.busy;
+  const go = document.getElementById('update-go');
+  go.disabled = view.busy || !view.staged;
+
+  const failed = progress.stage === 'failed';
+  error.hidden = !failed;
+  error.textContent = failed
+    ? `${progress.error} Try again later, or download it yourself:`
+    : '';
+  rescue.hidden = !failed;
+  page.textContent = view.release.page || '';
+
+  const running = view.busy || view.staged;
+  const measured = progress.total > 0;
+  bar.hidden = !running;
+  bar.classList.toggle('sweeping', running && !measured);
+  fill.style.width = measured ? `${(progress.done / progress.total) * 100}%` : '';
+
+  const say = updateWords[progress.stage];
+  note.textContent = say ? say(progress) : '';
+  note.classList.toggle('done', progress.stage === 'ready');
+}
+
+async function updateTick() {
+  const view = await window.smlUpdate();
+  showUpdate(view);
+  showUpdateProgress(view);
+  // The header line is the whole point of the early poll, so it stops once
+  // there is an answer. It keeps going while the dialog is doing something.
+  const working = view.busy || !document.getElementById('updater').hidden;
+  if (!working && (view.found || --checksLeft <= 0)) {
+    clearInterval(watchingUpdate);
+    watchingUpdate = 0;
+  }
+}
+
+function watchUpdate() {
+  if (!watchingUpdate) {
+    watchingUpdate = setInterval(updateTick, 1000);
+  }
+  updateTick();
+}
+
+function wireUpdate() {
+  document.getElementById('update-open').addEventListener('click', () => {
+    document.getElementById('updater').hidden = false;
+    // Straight into the download. The player pressed a link that says what it
+    // is going to do, and a dialog that then asks again is a dialog nobody
+    // reads the second time. Unless it is already downloaded, in which case
+    // the only thing left is the button underneath.
+    if (!updateStaged) {
+      window.smlUpdateGet();
+    }
+    watchUpdate();
+  });
+
+  document.getElementById('update-close').addEventListener('click', () => {
+    document.getElementById('updater').hidden = true;
+  });
+
+  document.getElementById('update-go').addEventListener('click', () => {
+    window.smlUpdateApply();
+    watchUpdate();
+  });
+
+  document.getElementById('update-page').addEventListener('click', () => {
+    window.smlOpen(document.getElementById('update-page').textContent);
+  });
+
+  watchUpdate();
+}
+
+
 async function start() {
   const state = await window.smlState();
   hooks = state.hooks || [];
@@ -624,6 +742,7 @@ async function start() {
   document.getElementById('debug').checked = !!state.debug;
   wireJava(state);
   wireStore();
+  wireUpdate();
   // Before `ready` below, so the first thing this page remembers is the
   // settings file's own answer rather than an empty list.
   await storeTick();

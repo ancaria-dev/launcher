@@ -11,6 +11,14 @@
     <div class="titles">
       <h1>Sacred Mod Loader</h1>
       <p id="version">&nbsp;</p>
+      <!-- Hidden unless there is genuinely a newer release. An up-to-date
+           launcher and one that could not reach GitHub look the same here on
+           purpose: neither is news, and neither is the player's problem while
+           they are trying to start a game. -->
+      <p id="update" hidden>
+        <span id="update-what"></span>
+        <button id="update-open" type="button" class="link"></button>
+      </p>
     </div>
   </header>
 
@@ -157,6 +165,31 @@
       <div class="actions">
         <button id="jdk-close" type="button" class="ghost">Close</button>
         <button id="jdk-get" type="button">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upgrading the launcher. No way out while it is working: the file being
+       replaced is the one running this window, and a dialog dismissed halfway
+       is a player wondering whether it finished. Close comes back the moment
+       nothing is in flight. -->
+  <div id="updater" class="overlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="updater-title">
+      <h2 id="updater-title">Update Sacred Mod Loader</h2>
+      <p class="hint">The whole loader travels inside this one file, so the
+        update replaces it and starts the new one. Your mods, your settings and
+        any Java the launcher downloaded stay where they are.</p>
+
+      <div id="update-bar" class="bar" hidden><div id="update-fill"></div></div>
+      <p id="update-note" class="hint"></p>
+      <p id="update-error" class="bad" hidden></p>
+      <p id="update-rescue" class="hint" hidden>
+        <button id="update-page" type="button" class="link"></button>
+      </p>
+
+      <div class="actions">
+        <button id="update-close" type="button" class="ghost">Close</button>
+        <button id="update-go" type="button">Install &amp; Restart</button>
       </div>
     </div>
   </div>

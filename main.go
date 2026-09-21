@@ -26,6 +26,7 @@ import (
 	"github.com/ancaria-dev/launcher/registry"
 	"github.com/ancaria-dev/launcher/secret"
 	"github.com/ancaria-dev/launcher/ui"
+	"github.com/ancaria-dev/launcher/update"
 )
 
 func main() {
@@ -58,6 +59,13 @@ func main() {
 	// to the host: without one the zygote never runs and no mod ever loads, and
 	// that is worth saying on the page instead of leaving as a silent nothing.
 	jdk := java.New(found.LoaderDir())
+
+	// Whether there is a newer launcher. Started here and never waited for:
+	// the whole loader ships inside this executable, so a player who misses a
+	// release keeps the host and the jars they downloaded with it, and every
+	// mod they install afterwards is measured against those.
+	newer := update.New(found.LoaderDir(), install.Version())
+	newer.Check()
 
 	state := ui.State{
 		Version: install.Version(),
@@ -127,6 +135,27 @@ func main() {
 		Get:  jdk.Get,
 	}
 
+	upgrade := ui.Update{
+		View: func() ui.UpdateView {
+			snapshot := newer.Snapshot()
+			return ui.UpdateView{
+				Current: snapshot.Current,
+				Release: ui.UpdateRelease{
+					Version: snapshot.Release.Version,
+					Size:    snapshot.Release.Size,
+					Page:    snapshot.Release.Page,
+				},
+				Found:    snapshot.Found,
+				Progress: ui.UpdateProgress(snapshot.Progress),
+				Busy:     snapshot.Busy,
+				Staged:   snapshot.Staged,
+			}
+		},
+		Get:   newer.Get,
+		Apply: newer.Apply,
+		Open:  ui.Open,
+	}
+
 	shelf := ui.Store{
 		View:       store.View,
 		Load:       store.Load,
@@ -159,7 +188,7 @@ func main() {
 			return
 		}
 		session.Wait()
-	}, panel, shelf)
+	}, panel, shelf, upgrade)
 }
 
 // javaRow is the JDK as the page draws it.
