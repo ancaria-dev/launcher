@@ -27,6 +27,7 @@ The launcher is a player-facing application. No other repository imports it.
 | `secret/` | DPAPI. A token for a private mod repository is encrypted with the player's Windows account when DPAPI works. The UI warns when it will be saved as plain text instead. |
 | `game/` | Starts `protocol.exe`, then the game, and waits. `exe.go` owns the executable names, the build the addresses came from, and reading the one in the folder. |
 | `java/` | Finds the JDK the host will run Coderpack on, and fetches one from the foojay Disco API when the machine has none. |
+| `update/` | The launcher replacing itself: what GitHub published last, the download, and the swap. |
 | `ui/` | The WebView2 window. `ui/web/` is inlined into one HTML string. |
 | `ui/dpi.go` | DPI awareness, declared before any window exists. |
 | `tools/` | `build.ps1` (payload + binary), `install.ps1` (build + copy into the game folder), `rsrc/` (the Windows resources: icon and version block). |
@@ -163,6 +164,47 @@ Whatever wins is passed to the host as `--java <path>`. The flag was already
 there and `game.Start` now fills it in. `protocol.exe` on its own prefers
 `<install>/java/bin/java.exe` before `JAVA_HOME`, so a host started by hand out
 of the game folder reaches the same JVM the launcher would have handed it.
+
+## Updating itself
+
+Everything the loader is travels inside this executable, so replacing it and
+starting it again is the whole upgrade: the new one unpacks its own payload on
+the first run that finds a different `VERSION` in the game folder. Which is
+also why it is worth doing. A player who never notices a release keeps the host
+and the jars they downloaded with, and every mod they install afterwards is
+measured against those.
+
+`update.Latest` reads `releases/latest` from the GitHub API and takes the one
+asset whose name ends in `.exe`. By extension and not by name: GitHub rewrites
+the spaces in `Sacred Mod Loader.exe` into dots on the way out, so a launcher
+matching the name it uploaded would stop finding its own release.
+
+`update.Newer` compares through `pin.Parse`, not as text. `0.99.0` sorts above
+`0.100.0` as a string, and a launcher that compared strings would offer half
+its users a downgrade. A build from a checkout calls itself `dev`, which does
+not parse, and is treated as newer than every release rather than older than
+all of them.
+
+The check runs at startup in a goroutine and nothing waits for it. A failure is
+silent: not reaching github.com is the ordinary condition of a machine that is
+offline, and answering it with a banner turns a non-event into an alarm about
+something nobody asked for.
+
+The download goes to `<game>/launcher/update/launcher.exe` under a fixed local
+name, and the name GitHub gave the asset is never read. It is checked against
+the size the release published and for the `MZ` of a Windows executable. There
+is no digest to verify against, because GitHub publishes none beside the asset,
+and saying otherwise would be a lie. What these two do catch is the common
+failure, which is a captive portal or an error page arriving with a 200 and
+being installed as the launcher.
+
+`update.Apply` renames the running executable to `<name>.old`, renames the
+staged one into its place, and starts it. Windows refuses to delete a running
+executable but allows it to be renamed, which is the whole trick and the same
+one `install.write` uses for the host. If the second rename fails the first is
+undone, because a game folder with no launcher in it is worse than a failed
+update. `update.Sweep` clears the `.old` and any abandoned download at the next
+start, the way `java.Sweep` does.
 
 ## Mods
 
@@ -370,6 +412,19 @@ changes, save a fresh response instead of editing a fixture by hand:
   download. With no Java path, the flag is omitted. The host then looks first
   in `<install>/java/bin/java.exe`, followed by `JAVA_HOME` and whatever `java`
   means on PATH.
+- The updater writes inside the game folder like everything else. Not
+  `%TEMP%`: uninstalling this loader is deleting the game folder, and that
+  sentence stops being true the moment something is written outside it. It is
+  also the only place where the swap is a rename rather than a copy, since
+  `%TEMP%` is regularly on another volume.
+- Nothing a release says decides a path. The staged file has a fixed local
+  name and the asset's own name is never used for one, the same rule a mod
+  jar's file name follows.
+- A link in the page must never be an `<a href>`. This window is the launcher
+  and has no address bar, so following one replaces the launcher with a web
+  page and leaves no way back. `ui.Open` hands the URL to ShellExecute, and it
+  refuses anything that is not http or https, because ShellExecute runs
+  whatever a scheme is registered to and these strings came off the network.
 - `mods.API` has to move with `Api.VERSION` in coderpack and `Verifier.API` in
   the build repository. There is no shared source: this one is read without a
   JVM. Coderpack's CI checks out this repository and the plugin and fails when
@@ -466,6 +521,13 @@ Coderpack CI does check out launcher and build to verify that `mods.API`,
 - The zip guard is `filepath.IsLocal`, and an absolute entry name is refused
   rather than trimmed. Stripping the leading slash off `/windows/system32/...`
   would contain it by accident, which is not the same as noticing it.
+- `update.Apply` is the one thing here with no automated test. It renames the
+  running executable, so a test of it would be a test renaming the test binary
+  out from under itself. `TestApplyWithNothingStagedSaysSo` covers the refusal
+  and the rest was checked by hand against a real release. Verify it that way
+  after touching it: build with a lowered `.version`, run it in a folder
+  holding nothing but an empty `Game.exe`, and check that `VERSION` in the
+  game folder afterwards names the release that was downloaded.
 - `install/` and `java/` both write into `<game>/launcher`, and neither knows
   about the other. `Unpack` skips names starting with `.` and writes only what
   is in the payload, so a JDK sitting in `launcher/java` survives a version bump

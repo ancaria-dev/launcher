@@ -71,6 +71,26 @@ Dateien und Archive mit falscher Prüfsumme werden gelöscht. Entpackt wird in
 einen temporären Ordner, sodass ein fehlgeschlagenes Update das vorhandene JDK
 nicht beschädigt.
 
+## Den Launcher aktualisieren
+
+Der gesamte Loader steckt in einer einzigen EXE, ein Update ist also: Datei
+ersetzen und neu starten. Beim Start fragt der Launcher GitHub, ob es ein
+neueres Release gibt. Wenn ja, erscheint unter der Version im Kopf die Zeile
+**Version X is available. Download & install now**. Gibt es keines, oder ist
+GitHub nicht erreichbar, erscheint gar nichts.
+
+Der Link öffnet ein Fenster, das den Download sofort startet und sich nicht
+schließen lässt, solange er läuft. Die Datei landet in `launcher\update`
+innerhalb des Spielordners, nie in `%TEMP%` und nie außerhalb des
+Spielordners. Ist der Download fertig, erscheint **Install & Restart**. Der
+Launcher setzt die neue Datei an seine eigene Stelle, startet sie und beendet
+sich. Die alte bleibt als `Sacred Mod Loader.exe.old` daneben liegen und wird
+beim nächsten Start entfernt.
+
+Mods, Einstellungen und ein heruntergeladenes Java bleiben unberührt. Geht
+etwas schief, nennt das Fenster den Grund und bietet die Release-Seite als Link
+an, der im Browser geöffnet wird.
+
 ## Mods und Repositories
 
 Installed zeigt die Mods aus `<Spielordner>\mods`. Der Launcher liest ihre

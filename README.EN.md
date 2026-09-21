@@ -63,6 +63,25 @@ for the selected build, the launcher checks the archive against it. Failed,
 partial, and mismatched downloads are removed. Extraction happens in a staging
 directory, so a failed update leaves the existing JDK intact.
 
+## Updating the launcher
+
+The whole loader travels inside one executable, so an update is replacing it
+and starting it again. At startup the launcher asks GitHub whether a newer
+release exists. If one does, a line appears under the version in the header:
+**Version X is available. Download & install now**. If there is none, or GitHub
+cannot be reached, nothing appears at all.
+
+The link opens a window that starts the download at once and stays open until
+it finishes. The file goes to `launcher\update` inside the game folder, never
+to `%TEMP%` and never anywhere outside the game folder. When the download is
+done an **Install & Restart** button appears. The launcher puts the new file in
+its own place, starts it and closes. The old one is left beside it as
+`Sacred Mod Loader.exe.old` and removed on the next start.
+
+Mods, settings and any Java the launcher downloaded stay where they are. If
+something goes wrong the window says what, and offers the release page as a
+link that opens in your browser.
+
 ## Mods and repositories
 
 The Installed tab lists mods from `<game folder>\mods`. The launcher reads each
