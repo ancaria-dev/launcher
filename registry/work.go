@@ -17,12 +17,17 @@ const (
 	StageIdle     = ""
 	StageIndex    = "index"
 	StageDownload = "download"
+	StageRemove   = "remove"
 	StageDone     = "done"
 	StageFailed   = "failed"
 )
 
 // Progress is the one job that can be running.
 type Progress struct {
+	// ID is the mod this is about, so the page can say so on the row that was
+	// pressed rather than only on a bar at the foot of the panel. Empty while
+	// an index is being read, which is about no single mod.
+	ID    string `json:"id"`
 	Stage string `json:"stage"`
 	Note  string `json:"note"`
 	Done  int64  `json:"done"`
@@ -293,13 +298,14 @@ func (w *Work) Get(id string) {
 	if !found {
 		return
 	}
-	if !w.start(Progress{Stage: StageDownload, Note: entry.Name, Total: entry.Size}) {
+	if !w.start(Progress{ID: entry.ID, Stage: StageDownload, Note: entry.Name, Total: entry.Size}) {
 		return
 	}
 	go func() {
 		defer w.finish()
 		err := Install(w.loader, w.modsDir, remote, entry, func(done, total int64) {
-			w.note(Progress{Stage: StageDownload, Note: entry.Name, Done: done, Total: entry.Size})
+			w.note(Progress{ID: entry.ID, Stage: StageDownload, Note: entry.Name,
+				Done: done, Total: entry.Size})
 		})
 		if err != nil {
 			w.fail(err)
@@ -309,13 +315,16 @@ func (w *Work) Get(id string) {
 			w.hooks.Enable(entry.ID)
 		}
 		w.rescan()
-		w.note(Progress{Stage: StageDone, Note: entry.Name})
+		w.note(Progress{ID: entry.ID, Stage: StageDone, Note: entry.Name})
 	}()
 }
 
 // Drop removes an installed mod from the folder.
 func (w *Work) Drop(id string) {
-	if !w.start(Progress{Stage: StageDownload, Note: id}) {
+	// Its own stage rather than borrowing the download's. Deleting a file is
+	// not a transfer, it has no length, and a bar drawn for it would be a bar
+	// that is lying about something.
+	if !w.start(Progress{ID: id, Stage: StageRemove, Note: id}) {
 		return
 	}
 	go func() {

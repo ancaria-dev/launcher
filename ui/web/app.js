@@ -88,11 +88,12 @@ function render() {
     const buttons = document.createElement('div');
     buttons.className = 'row-buttons';
     if (mod.update) {
-      buttons.append(button(`Update to ${mod.update}`, '', () => {
-        window.smlModsGet(mod.id);
-      }));
+      buttons.append(act(mod.id, `Update to ${mod.update}`,
+        () => window.smlModsGet(mod.id)));
     }
-    buttons.append(button('Remove', 'ghost', () => window.smlModsDrop(mod.id)));
+    const remove = act(mod.id, 'Remove', () => window.smlModsDrop(mod.id));
+    remove.classList.add('ghost');
+    buttons.append(remove);
 
     // The whole row toggles: a 13px checkbox is a poor target and the row is
     // the thing that looks clickable.
@@ -108,9 +109,11 @@ function render() {
       });
     }
 
+    row.dataset.mod = mod.id;
     row.append(picture(mod.id), box, text, buttons);
     list.append(row);
   }
+  paintRows();
 }
 
 // --- pieces every row is built out of ------------------------------------
@@ -435,6 +438,66 @@ function wireJava(state) {
 let storeSeen = '';
 let sealed = false;
 
+// The mod whose button was just pressed. A binding returns before the work it
+// started has produced anything, and the poll behind it is half a second wide,
+// so without this a player presses Install and watches nothing happen for long
+// enough to press it again. Cleared by the first poll that says the work is
+// over.
+let pressed = '';
+
+// act is a row button that has something to report while it runs. The label is
+// kept on the element so paintRows can put it back, and the row carries the
+// mod id so the right button can be found without rebuilding the list.
+function act(id, label, call) {
+  const element = button(label, '', () => {
+    pressed = id;
+    call();
+    // Both now rather than on the next tick: one paints the press, the other
+    // asks Go what it made of it without waiting out the interval.
+    paintRows();
+    storeTick();
+  });
+  element.classList.add('act');
+  element.dataset.label = label;
+  return element;
+}
+
+// What the working row's button says while it works.
+const actWords = {
+  download: progress => progress.total
+    ? `${Math.floor((progress.done / progress.total) * 100)}%`
+    : 'Downloading',
+  remove: () => 'Removing',
+  done: () => 'Done',
+};
+
+// Marks the row that is working and locks the others, in place.
+//
+// In place because the alternative is render(), and a list rebuilt four times
+// a second is a list whose buttons move out from under the pointer. That is
+// the same reason storeTick only redraws when the answer changed.
+function paintRows(view) {
+  const progress = view ? view.progress : null;
+  const busy = view ? view.busy : !!pressed;
+  const working = busy ? ((progress && progress.id) || pressed) : '';
+  if (!busy) {
+    pressed = '';
+  }
+  for (const row of document.querySelectorAll('li[data-mod]')) {
+    const mine = row.dataset.mod === working;
+    for (const element of row.querySelectorAll('button.act')) {
+      // Every button is locked while anything runs: Work takes one job at a
+      // time and refuses the rest, and a button that can be pressed to no
+      // effect is worse than one that cannot be pressed.
+      element.disabled = !!working;
+      const say = mine && progress ? actWords[progress.stage] : null;
+      element.textContent = mine
+        ? (say ? `${element.dataset.label} ${say(progress)}` : `${element.dataset.label}…`)
+        : element.dataset.label;
+    }
+  }
+}
+
 function renderOffers() {
   const list = document.getElementById('offers');
   const nothing = document.getElementById('offers-empty');
@@ -462,15 +525,17 @@ function renderOffers() {
     const buttons = document.createElement('div');
     buttons.className = 'row-buttons';
     if (mod.supported) {
-      buttons.append(button('Install', '', () => window.smlModsGet(mod.id)));
+      buttons.append(act(mod.id, 'Install', () => window.smlModsGet(mod.id)));
     }
     if (mod.size) {
       buttons.append(line('mod-size', weight(mod.size)));
     }
 
+    row.dataset.mod = mod.id;
     row.append(picture(mod.id), text, buttons);
     list.append(row);
   }
+  paintRows();
 }
 
 function renderSources() {
@@ -513,6 +578,7 @@ const storeWords = {
   download: progress => progress.total
     ? `${progress.note}: ${Math.floor((progress.done / progress.total) * 100)}%`
     : progress.note,
+  remove: progress => `Removing ${progress.note}`,
   done: progress => `${progress.note} installed`,
 };
 
@@ -526,18 +592,23 @@ function showStore(view) {
   error.textContent = progress.error || '';
 
   const measured = progress.stage === 'download' && progress.total > 0;
-  bar.hidden = !view.busy;
-  bar.classList.toggle('sweeping', view.busy && !measured);
+  // Pressed but not yet confirmed still shows a bar. The press is the thing
+  // being acknowledged, and it is the half-second before Go answers that made
+  // this look broken.
+  const running = view.busy || !!pressed;
+  bar.hidden = !running;
+  bar.classList.toggle('sweeping', running && !measured);
   document.getElementById('store-fill').style.width =
     measured ? `${(progress.done / progress.total) * 100}%` : '';
 
   const say = storeWords[progress.stage];
-  const speaking = view.busy || progress.stage === 'done';
+  const speaking = running || progress.stage === 'done';
   note.textContent = speaking && say ? say(progress) : '';
   note.classList.toggle('done', progress.stage === 'done');
 
-  document.getElementById('refresh').disabled = view.busy;
-  document.getElementById('source-add').disabled = view.busy;
+  document.getElementById('refresh').disabled = running;
+  document.getElementById('source-add').disabled = running;
+  paintRows(view);
 }
 
 function tab(which) {
@@ -573,6 +644,23 @@ async function storeTick() {
   }
   showStore(view);
   await sweepIcons(view.loaded && !view.busy);
+  storePace(view.busy);
+}
+
+// 500 ms is fine for a list that only changes when somebody presses something,
+// and far too slow for a bar that is supposed to move. The Java panel polls at
+// 200 ms for the same reason; this one only pays it while there is something
+// to watch.
+let storePoll = 0;
+let storeFast = false;
+
+function storePace(busy) {
+  if (storePoll && busy === storeFast) {
+    return;
+  }
+  storeFast = busy;
+  clearInterval(storePoll);
+  storePoll = setInterval(storeTick, busy ? 200 : 500);
 }
 
 function wireStore() {
@@ -611,7 +699,7 @@ function wireStore() {
       'enter will be saved as plain text in launcher.json. Leave this field ' +
       'empty unless you accept that risk.';
 
-  setInterval(storeTick, 500);
+  storePace(false);
 }
 
 // --- updating the launcher -----------------------------------------------
