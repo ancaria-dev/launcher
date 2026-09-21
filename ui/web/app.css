@@ -540,7 +540,9 @@ aside h2 { margin-bottom: 14px; }
   overflow: hidden;
 }
 
-#jdk-fill {
+/* Two bars, one fill.  #store-fill had no rule of its own and drew an empty
+   track through every mod download. */
+#jdk-fill, #store-fill {
   height: 100%;
   width: 0;
   border-radius: 3px;
@@ -550,7 +552,8 @@ aside h2 { margin-bottom: 14px; }
 
 /* No total to divide by, since unpacking starts before the entry count is
    known, so the bar sweeps instead of lying about a percentage. */
-.bar.sweeping #jdk-fill {
+.bar.sweeping #jdk-fill,
+.bar.sweeping #store-fill {
   width: 34%;
   transition: none;
   animation: sweep 1.1s ease-in-out infinite;
