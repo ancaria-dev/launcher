@@ -21,7 +21,7 @@ const descriptor = "META-INF/declaration.toml"
 // checks and the Gradle plugin writes ranges against.  Raising it is one edit
 // here, one in Api.VERSION in coderpack and one in Verifier.API in the build
 // plugin.
-const API = "1"
+const API = "2"
 
 // Loader is what a descriptor is measured against: the API contract this
 // launcher implements and the release it is.
