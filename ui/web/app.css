@@ -200,6 +200,11 @@ main {
 #mods li.unsupported input { accent-color: var(--dim); }
 .mod-warn { color: var(--bad); font-size: 12.5px; margin-top: 3px; }
 
+/* A declared conflict, which is a caution and not a refusal. Same amber as the
+   game-build strip, and for the same reason: one of these is a thing that
+   cannot work, the other is a thing nobody has checked. */
+.mod-caution { color: var(--warn); font-size: 12.5px; margin-top: 3px; }
+
 #empty, #offers-empty { color: var(--dim); }
 
 /* The two lists are the panel's body, and each one has to be the part that

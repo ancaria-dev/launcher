@@ -2,6 +2,7 @@ package registry
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/ancaria-dev/launcher/mods"
 )
@@ -26,6 +27,12 @@ type Offer struct {
 	// report about a mod missing from a page that says it has everything.
 	Supported bool   `json:"supported"`
 	Refusal   string `json:"refusal"`
+
+	// Caution is the sentence for a mod declared to clash with another one the
+	// player can see. It is not a refusal and it stops nothing: installing
+	// both is allowed and drawn in the amber a caution gets, because this is a
+	// thing somebody has to decide rather than a thing that cannot work.
+	Caution string `json:"caution"`
 }
 
 // Known is what a registry has to say about a mod already in the folder.
@@ -57,14 +64,8 @@ func Merge(loader mods.Loader, installed []mods.Mod, indexes map[string]*Index, 
 	}
 
 	here := map[string]mods.Mod{}
-	refused := map[string]bool{}
 	for _, mod := range installed {
 		here[mod.ID] = mod
-		// What an installed mod refuses to sit beside is as binding as what a
-		// candidate does. It is here and they are not.
-		for _, other := range mod.Conflicts {
-			refused[other] = true
-		}
 	}
 
 	// Every candidate, before anything is hidden, so a conflict can be seen
@@ -95,15 +96,15 @@ func Merge(loader mods.Loader, installed []mods.Mod, indexes map[string]*Index, 
 		}
 	}
 
-	// Both sides of every conflict between two candidates.
-	fought := map[string]bool{}
+	// Who has said they clash with whom, across everything on this page.  A
+	// declared conflict is a caution and not a gate: the pair is drawn with a
+	// sentence and both stay installable.
+	clash := &Clash{}
+	for _, mod := range installed {
+		clash.Add(mod.ID, mod.Name, mod.Conflicts)
+	}
 	for _, one := range candidates {
-		for _, other := range one.entry.Conflicts {
-			if offered[other] > 0 {
-				fought[one.entry.ID] = true
-				fought[other] = true
-			}
-		}
+		clash.Add(one.entry.ID, one.entry.Name, one.entry.Conflicts)
 	}
 
 	offers := []Offer{}
@@ -116,10 +117,10 @@ func Merge(loader mods.Loader, installed []mods.Mod, indexes map[string]*Index, 
 		if _, installed := here[entry.ID]; installed {
 			continue
 		}
-		if duplicated[entry.ID] || fought[entry.ID] || refused[entry.ID] {
-			continue
-		}
-		if conflictsWithInstalled(entry, here) {
+		// The one thing still hidden, and it is not a conflict between two
+		// mods. One id from two repositories is an ambiguity about which file
+		// Install means, and there is no sentence that resolves it.
+		if duplicated[entry.ID] {
 			continue
 		}
 		offers = append(offers, Offer{
@@ -133,6 +134,7 @@ func Merge(loader mods.Loader, installed []mods.Mod, indexes map[string]*Index, 
 			Remote:      found.remote,
 			Supported:   refusal == "",
 			Refusal:     refusal,
+			Caution:     clash.Sentence(entry.ID),
 		})
 	}
 	sort.Slice(offers, func(a, b int) bool { return offers[a].Name < offers[b].Name })
@@ -162,11 +164,67 @@ func Merge(loader mods.Loader, installed []mods.Mod, indexes map[string]*Index, 
 	return offers, known
 }
 
-func conflictsWithInstalled(entry Entry, here map[string]mods.Mod) bool {
-	for _, other := range entry.Conflicts {
-		if _, found := here[other]; found {
-			return true
+// Clash is who has declared a conflict with whom, in both directions.
+//
+// A mod names what it will not sit beside, and the other half of that pair
+// says nothing. Both are equally affected by the combination, so both are told
+// about it: a player looking at the one that stayed quiet would otherwise have
+// no way of knowing it was half of a pair.
+//
+// Only pairs where both sides are present produce a sentence. A mod naming
+// something nobody offers and nobody has installed is naming nothing the
+// player can act on.
+type Clash struct {
+	names map[string]string
+	with  map[string]map[string]bool
+}
+
+// Add records one mod: what it is called, and what it says it clashes with.
+func (c *Clash) Add(id, name string, conflicts []string) {
+	if c.names == nil {
+		c.names = map[string]string{}
+		c.with = map[string]map[string]bool{}
+	}
+	if name == "" {
+		name = id
+	}
+	c.names[id] = name
+	for _, other := range conflicts {
+		c.pair(id, other)
+		c.pair(other, id)
+	}
+}
+
+func (c *Clash) pair(from, to string) {
+	if c.with[from] == nil {
+		c.with[from] = map[string]bool{}
+	}
+	c.with[from][to] = true
+}
+
+// Sentence is what goes under one mod's description, empty when it clashes
+// with nothing the player can see.
+//
+// Written here rather than on the page for the same reason Refusal is: the
+// names are Go's, and a sentence assembled in JavaScript out of a list is a
+// second place to keep the wording right.
+func (c *Clash) Sentence(id string) string {
+	var named []string
+	for other := range c.with[id] {
+		if name, known := c.names[other]; known {
+			named = append(named, name)
 		}
 	}
-	return false
+	if len(named) == 0 {
+		return ""
+	}
+	sort.Strings(named)
+
+	list, allowed := named[0], "Both can be installed"
+	if len(named) > 1 {
+		list = strings.Join(named[:len(named)-1], ", ") + " and " + named[len(named)-1]
+		allowed = "They can all be installed"
+	}
+	return "May not work correctly alongside " + list + ". " + allowed +
+		"; turn one off if the game misbehaves."
 }

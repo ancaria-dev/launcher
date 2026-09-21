@@ -78,11 +78,11 @@ function render() {
       text.append(line('mod-warn', mod.refusal ||
         'This mod doesn’t support this version of the loader.'));
     }
-    // Both are already in the folder, so there is nothing to hide and something
-    // to say. The list of what to install hides such a pair instead.
-    if (mod.conflict) {
-      text.append(line('mod-warn', `This mod conflicts with ${mod.conflict}. ` +
-        `Disable one of them to avoid unpredictable behavior.`));
+    // Amber, not the red a refusal gets: a refusal is a thing that cannot
+    // work, this is a thing nobody has checked. Both mods keep running and
+    // the player decides.
+    if (mod.caution) {
+      text.append(line('mod-caution', mod.caution));
     }
 
     const buttons = document.createElement('div');
@@ -520,6 +520,12 @@ function renderOffers() {
     if (!mod.supported) {
       text.append(line('mod-warn', mod.refusal ||
         'This mod was built for a different loader version and cannot run here.'));
+    }
+    // Said before installing rather than after, and it does not stop the
+    // button: what a mod declares about another is its author's opinion, not
+    // a measurement.
+    if (mod.caution) {
+      text.append(line('mod-caution', mod.caution));
     }
 
     const buttons = document.createElement('div');

@@ -130,17 +130,80 @@ func TestLabelIsShortEnoughToPrintUnderAName(t *testing.T) {
 	}
 }
 
-// The rule this whole feature turns on: a pair that cannot work together stops
-// being offered at all, rather than being offered with a warning nobody reads.
-func TestMergeHidesBothSidesOfAConflict(t *testing.T) {
+// A declared conflict is a caution, not a gate. Both sides stay installable
+// and both are told, because the combination is what misbehaves and the mod
+// that stayed quiet is half of it.
+//
+// This used to hide both. One mod naming two others emptied three quarters of
+// the default repository, and a player saw one mod out of four with nothing
+// on the page to say why.
+func TestMergeOffersBothSidesOfAConflictAndNamesIt(t *testing.T) {
 	remote := Remote{URL: "u", Raw: "r"}
 	indexes := map[string]*Index{"u": {Mods: []Entry{
-		{ID: "self-check", API: "1", Conflicts: []string{"old-huge-potions"}},
-		{ID: "old-huge-potions", API: "1"},
-		{ID: "all-my-runes", API: "1"},
+		{ID: "self-check", Name: "Self Check", API: "1",
+			Conflicts: []string{"old-huge-potions"}},
+		{ID: "old-huge-potions", Name: "Old Huge Potions", API: "1"},
+		{ID: "all-my-runes", Name: "All My Runes", API: "1"},
 	}}}
 	offers, _ := Merge(here, nil, indexes, []Remote{remote})
-	if len(offers) != 1 || offers[0].ID != "all-my-runes" {
+	if len(offers) != 3 {
+		t.Fatalf("offered %+v", offers)
+	}
+	by := map[string]Offer{}
+	for _, offer := range offers {
+		by[offer.ID] = offer
+	}
+	for _, offer := range offers {
+		if !offer.Supported {
+			t.Errorf("a caution is not a refusal: %+v", offer)
+		}
+	}
+	// Named, not identified: the sentence is read by somebody who knows the
+	// mod by the name on its row.
+	if !strings.Contains(by["self-check"].Caution, "Old Huge Potions") {
+		t.Errorf("self-check says %q", by["self-check"].Caution)
+	}
+	// The other half never said anything and is told anyway.
+	if !strings.Contains(by["old-huge-potions"].Caution, "Self Check") {
+		t.Errorf("old-huge-potions says %q", by["old-huge-potions"].Caution)
+	}
+	if by["all-my-runes"].Caution != "" {
+		t.Errorf("a mod in no conflict was cautioned: %q", by["all-my-runes"].Caution)
+	}
+}
+
+// The sentence itself, both shapes of it. Written out in full because it is
+// what a player reads, and because assembling it from a count is exactly the
+// kind of code that produces "Both can all be installed".
+func TestCautionReadsAsASentence(t *testing.T) {
+	one := &Clash{}
+	one.Add("a", "Alpha", []string{"b"})
+	one.Add("b", "Beta", nil)
+	want := "May not work correctly alongside Beta. Both can be installed; " +
+		"turn one off if the game misbehaves."
+	if got := one.Sentence("a"); got != want {
+		t.Errorf("one conflict reads %q, want %q", got, want)
+	}
+
+	many := &Clash{}
+	many.Add("a", "Alpha", []string{"b", "c"})
+	many.Add("b", "Beta", nil)
+	many.Add("c", "Gamma", nil)
+	want = "May not work correctly alongside Beta and Gamma. They can all be " +
+		"installed; turn one off if the game misbehaves."
+	if got := many.Sentence("a"); got != want {
+		t.Errorf("two conflicts read %q, want %q", got, want)
+	}
+}
+
+// A mod naming something no repository offers and nobody has installed is
+// naming nothing the player can act on.
+func TestMergeSaysNothingAboutAConflictNobodyCanSee(t *testing.T) {
+	indexes := map[string]*Index{"u": {Mods: []Entry{
+		{ID: "lonely", Name: "Lonely", API: "1", Conflicts: []string{"absent"}},
+	}}}
+	offers, _ := Merge(here, nil, indexes, []Remote{{URL: "u"}})
+	if len(offers) != 1 || offers[0].Caution != "" {
 		t.Fatalf("offered %+v", offers)
 	}
 }
@@ -157,10 +220,20 @@ func TestMergeKeepsAwayFromWhatIsAlreadyInstalled(t *testing.T) {
 	}
 	offers, known := Merge(here, installed, indexes, []Remote{remote})
 
-	// self-check is installed, so it is not on offer. all-my-runes is refused by
-	// what is installed, and old-huge-potions is the only thing left.
-	if len(offers) != 1 || offers[0].ID != "old-huge-potions" {
+	// self-check is installed, so it is not on offer. The other two are, and
+	// the one it named carries the sentence rather than disappearing.
+	if len(offers) != 2 {
 		t.Fatalf("offered %+v", offers)
+	}
+	by := map[string]Offer{}
+	for _, offer := range offers {
+		by[offer.ID] = offer
+	}
+	if by["all-my-runes"].Caution == "" {
+		t.Error("a mod an installed one named was offered with nothing said")
+	}
+	if by["old-huge-potions"].Caution != "" {
+		t.Errorf("an unrelated mod was cautioned: %q", by["old-huge-potions"].Caution)
 	}
 	if known["self-check"].Update != "0.2.0" {
 		t.Fatalf("no update was noticed: %+v", known["self-check"])

@@ -41,9 +41,10 @@ type Row struct {
 	Known
 	Enabled bool `json:"enabled"`
 
-	// Conflict names an installed mod this one cannot sit beside. Both are
-	// already here, so hiding them is not an option and saying so is.
-	Conflict string `json:"conflict"`
+	// Caution is the sentence for a mod that is installed beside something it
+	// declared a conflict with. Both are here and both keep working; what the
+	// pair does between them is the thing worth saying.
+	Caution string `json:"caution"`
 }
 
 // Source is a repository as the page lists it.
@@ -146,20 +147,18 @@ func (w *Work) View() View {
 		}
 		view.Sources = append(view.Sources, source)
 	}
-	here := map[string]bool{}
+	// Only what is installed. A conflict with something merely on offer is
+	// about a combination nobody has yet, and this list is what is running.
+	clash := &Clash{}
 	for _, mod := range w.installed {
-		here[mod.ID] = true
+		clash.Add(mod.ID, mod.Name, mod.Conflicts)
 	}
 	for _, mod := range w.installed {
 		row := Row{Mod: mod, Known: known[mod.ID]}
 		if w.hooks.Enabled != nil {
 			row.Enabled = mod.Supported && w.hooks.Enabled(mod.ID)
 		}
-		for _, other := range mod.Conflicts {
-			if here[other] {
-				row.Conflict = other
-			}
-		}
+		row.Caution = clash.Sentence(mod.ID)
 		view.Installed = append(view.Installed, row)
 	}
 	return view
