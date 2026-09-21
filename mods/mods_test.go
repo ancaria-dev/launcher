@@ -107,13 +107,13 @@ func TestConflictsAreReadOffTheDescriptor(t *testing.T) {
 	jar(t, dir, "one.jar", `
 id = "one"
 entrypoint = "demo.One"
-api = "1"
+api = "2"
 conflicts = ["two", "three"]
 `)
 	jar(t, dir, "four.jar", `
 id = "four"
 entrypoint = "demo.Four"
-api = "1"
+api = "2"
 `)
 
 	found := here.Scan(dir)
@@ -138,17 +138,17 @@ func TestRangesDecideWhatLoads(t *testing.T) {
 		loader    string
 		supported bool
 	}{
-		{"the usual major", "[1,2)", "", true},
-		{"exactly this one", "[1]", "", true},
-		{"a bare number, the old spelling", "1", "", true},
+		{"the usual major", "[2,3)", "", true},
+		{"exactly this one", "[2]", "", true},
+		{"a bare number, the old spelling", "2", "", true},
 		{"two majors at once", "[1,3)", "", true},
-		{"the next major only", "[2,3)", "", false},
-		{"everything before this one", "(,1)", "", false},
-		{"a release this launcher has", "[1,2)", "[0.1.20,)", true},
-		{"a release older than this one", "[1,2)", "(,0.1.0]", false},
-		{"a release not out yet", "[1,2)", "[0.2.0,)", false},
-		{"a range nobody can read", "[1,2", "", false},
-		{"a loader range nobody can read", "[1,2)", "2,3", false},
+		{"the next major only", "[3,4)", "", false},
+		{"everything before this one", "(,2)", "", false},
+		{"a release this launcher has", "[2,3)", "[0.1.20,)", true},
+		{"a release older than this one", "[2,3)", "(,0.1.0]", false},
+		{"a release not out yet", "[2,3)", "[0.2.0,)", false},
+		{"a range nobody can read", "[2,3", "", false},
+		{"a loader range nobody can read", "[2,3)", "2,3", false},
 	}
 	for _, one := range cases {
 		t.Run(one.name, func(t *testing.T) {
@@ -177,12 +177,12 @@ func TestRangesDecideWhatLoads(t *testing.T) {
 // refusing every mod over it would be exactly the wrong way round.
 func TestAnUnknownLauncherVersionRefusesNothing(t *testing.T) {
 	nameless := Loader{API: API}
-	if refusal := nameless.Refuse("[1,2)", "[9.9.9,)"); refusal != "" {
+	if refusal := nameless.Refuse("[2,3)", "[9.9.9,)"); refusal != "" {
 		t.Fatalf("refused: %s", refusal)
 	}
 	// The API contract is not excused by it, though: that one decides whether
 	// the code can run at all.
-	if nameless.Refuse("[2,3)", "") == "" {
+	if nameless.Refuse("[3,4)", "") == "" {
 		t.Fatal("an API mismatch has nothing to do with the release number")
 	}
 }
@@ -190,10 +190,10 @@ func TestAnUnknownLauncherVersionRefusesNothing(t *testing.T) {
 // Both refusals name the range that was written, because that string is what
 // somebody has to go and change.
 func TestARefusalQuotesWhatTheModAskedFor(t *testing.T) {
-	if got := here.Refuse("[2,3)", ""); !strings.Contains(got, "[2,3)") {
+	if got := here.Refuse("[3,4)", ""); !strings.Contains(got, "[3,4)") {
 		t.Errorf("api refusal was %q", got)
 	}
-	if got := here.Refuse("[1,2)", "[0.2.0,)"); !strings.Contains(got, "[0.2.0,)") {
+	if got := here.Refuse("[2,3)", "[0.2.0,)"); !strings.Contains(got, "[0.2.0,)") {
 		t.Errorf("loader refusal was %q", got)
 	}
 	if got := here.Refuse("", ""); !strings.Contains(got, "does not declare") {
