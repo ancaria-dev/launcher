@@ -264,6 +264,22 @@ falls back to plain text when protection fails. `secret.Works()` is checked at
 startup, and the page states whether a token will be encrypted or saved as
 plain text.
 
+The button that started the work says so, on its own row. `Progress.ID` names
+the mod the job is about, so the page can put the percentage on the button that
+was pressed rather than only on a bar at the foot of the panel, which on the
+Installed tab is a long way from the row and easy to miss. Every other row
+button is disabled while one runs, because `Work.start` takes one job at a time
+and silently refuses the rest, and a button that can be pressed to no effect
+reads as a launcher that ignored you.
+
+The press is acknowledged before Go has answered. A binding returns as soon as
+the goroutine is started and the poll behind it is half a second wide, so the
+page paints the pressed button itself and only then asks. That poll drops to
+200 ms while something is running, the way the Java panel's does, because
+500 ms is not a progress bar. `paintRows` changes the buttons in place and
+never calls `render`: a list rebuilt four times a second is a list whose
+buttons move out from under the pointer.
+
 Slow registry work runs in a goroutine because WebView2 bindings run on the
 window's message thread. The page polls `Work.View`, permits one registry job at
 a time, and redraws only when the result changes. This keeps the window
@@ -412,6 +428,10 @@ changes, save a fresh response instead of editing a fixture by hand:
   download. With no Java path, the flag is omitted. The host then looks first
   in `<install>/java/bin/java.exe`, followed by `JAVA_HOME` and whatever `java`
   means on PATH.
+- A row button that starts work has to report on it. `act` in `app.js` builds
+  those, and it keeps the original label on the element so `paintRows` can put
+  it back. A plain `button` for Install, Update or Remove is a button that
+  looks broken for as long as the work takes.
 - The updater writes inside the game folder like everything else. Not
   `%TEMP%`: uninstalling this loader is deleting the game folder, and that
   sentence stops being true the moment something is written outside it. It is
