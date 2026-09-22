@@ -66,6 +66,15 @@ function render() {
     box.type = 'checkbox';
     box.checked = on;
     box.disabled = !mod.supported;
+    box.title = mod.supported ? (on ? 'Enabled' : 'Disabled') : 'Can’t be enabled';
+    box.setAttribute('aria-label', mod.name);
+
+    // The box sits on the corner of the picture rather than in a column of its
+    // own. Between the icon and the name it hung at no height in particular,
+    // and the picture is where a player looks for which mod this is anyway.
+    const pick = document.createElement('div');
+    pick.className = 'pick';
+    pick.append(picture(mod.id), box);
 
     const text = document.createElement('div');
     text.append(heading(mod), source(mod));
@@ -110,7 +119,7 @@ function render() {
     }
 
     row.dataset.mod = mod.id;
-    row.append(picture(mod.id), box, text, buttons);
+    row.append(pick, text, buttons);
     list.append(row);
   }
   paintRows();

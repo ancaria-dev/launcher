@@ -179,7 +179,43 @@ main {
 #offers li:hover { border-color: var(--line); background: #262218; }
 #mods li.on { border-color: var(--gold-soft); background: #272014; }
 
-#mods input { margin: 3px 0 0; accent-color: var(--gold); }
+/* Whether a mod is on is a badge on the corner of its picture: gold with a
+   tick when it loads, an empty well when it does not, and the picture itself
+   fades with it so the answer reads from across the list. The ring around the
+   badge is the row's own background, which is why every row state below
+   names it: it cuts the corner out of the icon instead of drawing a frame. */
+#mods li { --row: var(--raised); }
+#mods li:hover { --row: #262218; }
+#mods li.on { --row: #272014; }
+#mods li.unsupported,
+#mods li.unsupported:hover { --row: var(--raised); }
+
+.pick { position: relative; flex: none; align-self: flex-start; }
+.pick .icon { transition: opacity 0.15s ease, filter 0.15s ease; }
+#mods li:not(.on) .icon { opacity: 0.55; filter: grayscale(0.7); }
+#mods li:not(.on):not(.unsupported):hover .icon { opacity: 0.8; }
+
+.pick input {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  appearance: none;
+  border-radius: 5px;
+  background: #16130f;
+  box-shadow: 0 0 0 2px var(--row), inset 0 0 0 1.5px var(--dim);
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+#mods li:hover .pick input { box-shadow: 0 0 0 2px var(--row), inset 0 0 0 1.5px var(--gold); }
+.pick input:checked,
+#mods li:hover .pick input:checked {
+  background: var(--gold) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.3 2.3 4.5-4.9' fill='none' stroke='%2314120f' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat;
+  box-shadow: 0 0 0 2px var(--row);
+}
+.pick input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
 .mod-name { font-weight: 600; }
 .mod-name em {
@@ -197,7 +233,11 @@ main {
 #offers li.unsupported { cursor: default; opacity: 0.72; }
 #mods li.unsupported:hover,
 #offers li.unsupported:hover { border-color: transparent; background: none; }
-#mods li.unsupported input { accent-color: var(--dim); }
+#mods li.unsupported .pick input,
+#mods li.unsupported:hover .pick input {
+  box-shadow: 0 0 0 2px var(--row), inset 0 0 0 1.5px var(--line);
+  cursor: default;
+}
 .mod-warn { color: var(--bad); font-size: 12.5px; margin-top: 3px; }
 
 /* A declared conflict, which is a caution and not a refusal. Same amber as the
