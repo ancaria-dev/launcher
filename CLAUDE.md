@@ -473,7 +473,7 @@ changes, save a fresh response instead of editing a fixture by hand:
 
 ## Sibling checkouts
 
-Sibling checkouts live under `ancaria-dev/` as submodules of the workspace.
+Sibling checkouts live under `ancaria-dev/` as separate clones in the workspace.
 None is required for an isolated launcher build. Missing `protocol` and
 `coderpack` checkouts are replaced by their pinned release assets. A missing
 `mappings` checkout makes `addr.py` use its own registry fallback when
