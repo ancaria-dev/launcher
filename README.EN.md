@@ -148,7 +148,7 @@ Python 3.11, and Rust 1.98 with the MSVC toolchain and LLVM. The host's
 
 Without those sibling repositories, the script downloads `protocol.exe`,
 `api.jar`, and `zygote.jar` from the releases pinned in `dependencies.json`.
-The current pins are `protocol` at `0.100.0` and `coderpack` at `0.99.0`. Only Go is
+The current pins are `protocol` at `0.101.0` and `coderpack` at `0.102.0`. Only Go is
 required for this path. There is no agent to download: the agent's JavaScript
 lives inside `protocol.exe`, minified, along with the address table it was built
 with. Pass `-Protocol none -Coderpack none` to use downloaded releases even
@@ -185,7 +185,7 @@ longer stages agent scripts: it asks the staged host for its hook sites with
 it. `go build` embeds the payload and Windows resources in
 `dist/Sacred Mod Loader.exe`.
 
-The current version is `0.100.0` in `.version`. Its copy in the installed payload
+The current version is `0.103.1` in `.version`. Its copy in the installed payload
 tells the launcher when to unpack updated files. `-Bump` raises the final version
 component before building.
 
