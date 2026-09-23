@@ -125,17 +125,28 @@ Speicherung als Klartext.
 Alle vom Loader verwendeten Adressen stammen aus `pureHD.exe` 2.0.2.118, dem
 HD-Wrapper der Community. Erkennt der Launcher eine andere ausführbare Datei,
 Version oder keine Versionsangabe, zeigt er über der Mod-Liste eine Warnung mit
-dem gefundenen und dem erwarteten Build an. Play bleibt verfügbar und
-ausgewählte Mods werden trotzdem geladen. Da die betreffenden Stellen in einer
-anderen EXE an anderen Adressen liegen können, funktionieren einzelne Mods
-möglicherweise nicht oder verhalten sich unerwartet.
+dem gefundenen und dem erwarteten Build sowie eine Schaltfläche Fix? an. Play
+öffnet zuerst einen Dialog mit drei Möglichkeiten: Cancel, Download pureHD und
+Run anyway. Run anyway startet das Spiel so, wie es ist, und ausgewählte Mods
+werden trotzdem geladen. Da die betreffenden Stellen in einer anderen EXE an
+anderen Adressen liegen können, funktionieren einzelne Mods möglicherweise nicht
+oder verhalten sich unerwartet.
+
+Download pureHD lädt `sacred.purehd.zip` von ancaria.dev, prüft die Datei gegen
+die im Launcher hinterlegte SHA-256 und legt `pureHD.exe` und `pHD.dll` neben
+das Spiel. Die ursprüngliche ausführbare Datei bleibt unberührt, eine ältere
+Kopie einer der beiden Dateien wird vorher nach `launcher\purehd-backup`
+verschoben. Das Schließen des Dialogs bricht den Download nicht ab, das tut
+nur Abort. Nach der Installation verschwindet die Warnung, und Play startet
+`pureHD.exe`.
 
 Die Originaldateien des Spiels bleiben unverändert. Der Loader setzt seine
 Hooks ausschließlich im Speicher des laufenden Prozesses. Beim Beenden des
 Spiels verschwinden diese Änderungen wieder. Keine Datei der
 Originalinstallation wird gepatcht, umbenannt oder ersetzt.
 Der Launcher schreibt nur eigene Dateien nach `launcher` und vom Nutzer
-verwaltete JAR-Dateien nach `mods`.
+verwaltete JAR-Dateien nach `mods`, dazu auf Wunsch `pureHD.exe` und `pHD.dll`
+neben das Spiel.
 
 Neben der Mod-Liste befinden sich zwei weitere Einstellungen. Der Inhalt des
 Feldes Flags wird an Leerraum in einzelne Argumente zerlegt und an das Spiel

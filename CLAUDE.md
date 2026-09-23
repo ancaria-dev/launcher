@@ -26,6 +26,7 @@ The launcher is a player-facing application. No other repository imports it.
 | `fetch/` | One HTTP download, done the same way by the JDK fetcher and by the registry: progress, hashing, and nothing partial left behind. |
 | `secret/` | DPAPI. A token for a private mod repository is encrypted with the player's Windows account when DPAPI works. The UI warns when it will be saved as plain text instead. |
 | `game/` | Starts `protocol.exe`, then the game, and waits. `exe.go` owns the executable names, the build the addresses came from, and reading the one in the folder. |
+| `purehd/` | Fetches `pureHD.exe` and `pHD.dll` from ancaria.dev for a folder with another build, pinned by SHA-256, and puts them beside the game. |
 | `java/` | Finds the JDK the host will run Coderpack on, and fetches one from the foojay Disco API when the machine has none. |
 | `update/` | The launcher replacing itself: what GitHub published last, the download, and the swap. |
 | `ui/` | The WebView2 window. `ui/web/` is inlined into one HTML string. |
@@ -164,6 +165,32 @@ Whatever wins is passed to the host as `--java <path>`. The flag was already
 there and `game.Start` now fills it in. `protocol.exe` on its own prefers
 `<install>/java/bin/java.exe` before `JAVA_HOME`, so a host started by hand out
 of the game folder reaches the same JVM the launcher would have handed it.
+
+## pureHD
+
+A folder with another build gets a Fix? button on the amber strip, and Play
+opens the same dialog before starting anything: Cancel, Download pureHD, and
+Run anyway in red. `purehd.Work` is the Java panel's shape again: a goroutine,
+a snapshot the page polls through `smlGame` every 200 ms, one job at a time.
+
+The archive is `https://ancaria.dev/files/sacred.purehd.zip`, served by the
+site's Worker out of an R2 bucket rather than from a GitHub release. It holds
+exactly `pureHD.exe` and `pHD.dll` at its root. `purehd.Checksum` and
+`purehd.Size` pin it, so replacing the file on the server without a launcher
+release that raises both is a download every player's launcher refuses.
+
+The download goes to `<game>/launcher/purehd.part` and unpacks into
+`purehd.new`, and the exe inside has to report `game.Expected` before anything
+in the game folder is touched. Then any existing file of either name, in any
+case, moves to `<game>/launcher/purehd-backup/<time>/` and the two new ones are
+renamed into place. The stock `Sacred.exe` is never touched: `game.Find` tries
+`pureHD.exe` first, so adding it is enough. `purehd.Sweep` clears `.part` and
+`.new` at the next start and leaves the backups alone.
+
+Closing the dialog does not stop the job. Abort cancels the request's context
+and works until the files start moving, after which `Abortable` is false and the
+page hides the button. After an install the snapshot carries a fresh
+`game.Describe`, so the strip disappears and Play stops asking.
 
 ## Updating itself
 
@@ -389,10 +416,11 @@ changes, save a fresh response instead of editing a fixture by hand:
   the stock game would pass a name check on the second name we try.
   `game.Expected` is that version and `game.Describe` performs the comparison.
   Both live in `exe.go` with the names.
-- A version mismatch is drawn as a caution and changes nothing else. Play still
-  works, the mods still tick, and `game.Expected` never reaches the host. The
-  loader attaching to an unknown build is the decision this repository has
-  already made. The launcher must tell the player before they press the button.
+- A version mismatch is drawn as a caution. Play asks first, through the pureHD
+  dialog, and Run anyway in it always starts the game: the mods still tick, and
+  `game.Expected` never reaches the host. The loader attaching to an unknown
+  build is the decision this repository has already made. The launcher must
+  tell the player before they press the button.
   That is why the strip is
   `--warn` rather than the `--bad` red an unsupported mod gets: one of these is
   a thing that cannot work, the other is a thing nobody has checked.
@@ -448,6 +476,11 @@ changes, save a fresh response instead of editing a fixture by hand:
   those, and it keeps the original label on the element so `paintRows` can put
   it back. A plain `button` for Install, Update or Remove is a button that
   looks broken for as long as the work takes.
+- pureHD is the one thing the launcher writes beside the game rather than under
+  `launcher`, and only its two fixed names. Never overwrite a file there without
+  moving it to `purehd-backup` first, and never take a name from the archive:
+  `purehd.files` is what is looked for, and everything else in the zip is
+  ignored.
 - The updater writes inside the game folder like everything else. Not
   `%TEMP%`: uninstalling this loader is deleting the game folder, and that
   sentence stops being true the moment something is written outside it. It is

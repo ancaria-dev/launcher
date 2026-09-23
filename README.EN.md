@@ -113,14 +113,23 @@ stored as plain text.
 Every address used by the loader comes from `pureHD.exe` 2.0.2.118, the
 community HD wrapper. If the executable in your folder has another version or
 no version information, a warning above the mod list shows the detected and
-expected builds. Play remains available and the selected mods will still be
-passed to the loader. Some mods may do nothing or behave incorrectly because
-the expected code may be at different addresses in another executable.
+expected builds, with a Fix? button. Play first opens a dialog with three
+choices: Cancel, Download pureHD, and Run anyway. Run anyway starts the game as
+it is, and the selected mods are still passed to the loader. Some mods may do
+nothing or behave incorrectly because the expected code may be at different
+addresses in another executable.
+
+Download pureHD fetches `sacred.purehd.zip` from ancaria.dev, checks it against
+the SHA-256 built into the launcher, and places `pureHD.exe` and `pHD.dll` next
+to the game. The original game executable is not touched, and an older copy of
+either file is moved to `launcher\purehd-backup` first. Closing the dialog
+does not stop the download; Abort does. Once it is installed the warning goes
+away and Play starts `pureHD.exe`.
 
 The loader does not patch, rename, or replace the original game files. Its
 changes exist only in the running process and disappear when the game closes.
 The launcher writes its own files under `launcher` and user-managed jars under
-`mods`.
+`mods`, plus `pureHD.exe` and `pHD.dll` next to the game when you ask for them.
 
 Two controls appear beside the mod list. The flags field passes its contents
 to the game after splitting the text on whitespace. The checkbox below it opens
