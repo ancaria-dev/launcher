@@ -20,6 +20,11 @@ import (
 // through here.
 var Names = []string{"pureHD.exe", "Sacred.exe", "Game.exe"}
 
+// Library is the DLL the wrapper loads from beside itself.  Names[0] and this
+// are the two files the launcher can fetch for a player whose folder has no
+// matching build, so they are named here with the rest.
+const Library = "pHD.dll"
+
 // Find returns the path to the game executable inside dir, or an empty string
 // when the folder holds none of them.
 //
