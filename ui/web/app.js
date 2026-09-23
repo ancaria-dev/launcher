@@ -259,21 +259,158 @@ function renderHooks() {
 
 // The game in this folder against the one every address in the loader was found
 // in. A player who has the expected build sees nothing. Anyone else is told
-// which is which while they can still do something about it, and Play is left
-// alone, and the loader attaches to an unknown build rather than refusing it.
-function showBuild(build) {
-  if (!build || !build.exe || build.matches) {
+// which is which while they can still do something about it, and offered the
+// build that matches. Play is not blocked: it asks first, and Run anyway is
+// always one of the answers.
+
+// The newest answer, from startup or from the last poll. Play reads it, because
+// a download that finished a minute ago has changed what Play should do.
+let build = null;
+let fixView = null;
+let fixPolling = 0;
+
+function describe(game) {
+  return game.version
+    ? `${game.exe} ${game.version}`
+    : `${game.exe}, with no version information`;
+}
+
+function mismatched(game) {
+  return !!game && !!game.exe && !game.matches;
+}
+
+function showBuild(game) {
+  build = game;
+  const notice = document.getElementById('build');
+  if (!mismatched(game)) {
+    notice.hidden = true;
     return;
   }
-  const notice = document.getElementById('build');
   const label = document.createElement('strong');
   label.textContent = 'Different game build.';
-  const found = build.version
-    ? `${build.exe} ${build.version}`
-    : `${build.exe}, with no version information`;
-  notice.append(label, ` Found ${found}. This loader targets ` +
-    `${build.expectedExe} ${build.expected}, so mods may not work correctly.`);
+  document.getElementById('build-text').replaceChildren(label,
+    ` Found ${describe(game)}. This loader targets ` +
+    `${game.expectedExe} ${game.expected}, so mods may not work correctly.`);
   notice.hidden = false;
+}
+
+const fixWords = {
+  download: progress => progress.total
+    ? `${progress.note}: ${size(progress.done)} of ${size(progress.total)}` +
+      ` (${Math.floor((progress.done / progress.total) * 100)}%)`
+    : `${progress.note}: ${size(progress.done)}`,
+  extract: progress => progress.total
+    ? `${progress.note}: ${Math.floor((progress.done / progress.total) * 100)}%`
+    : progress.note,
+  install: progress => progress.note,
+  done: progress => progress.note,
+  aborted: progress => progress.note,
+};
+
+function showFix(view) {
+  fixView = view;
+  const game = view.game;
+  const progress = view.progress;
+  showBuild(game);
+
+  document.getElementById('purehd-found').textContent = mismatched(game)
+    ? `This launcher found ${describe(game)}. Every address the mod loader ` +
+      `hooks was taken from ${game.expectedExe} ${game.expected}, and the ` +
+      "game's functions sit at different addresses in other builds, so mods " +
+      'will most likely not work with this one and may crash the game.'
+    : `${describe(game)} is the build the mod loader was made for.`;
+
+  const cancel = document.getElementById('purehd-cancel');
+  const get = document.getElementById('purehd-get');
+  const run = document.getElementById('purehd-run');
+  if (view.busy) {
+    // Aborting is the only thing left to do, and only until the files are
+    // being moved: stopping halfway through that would leave the folder worse
+    // off than either outcome.
+    cancel.textContent = 'Abort';
+    cancel.hidden = !view.abortable;
+    get.disabled = true;
+    run.hidden = true;
+  } else {
+    cancel.textContent = game.matches ? 'Close' : 'Cancel';
+    cancel.hidden = false;
+    get.disabled = false;
+    get.textContent = game.matches ? 'Play' : 'Download pureHD';
+    run.hidden = game.matches;
+  }
+
+  const error = document.getElementById('purehd-error');
+  error.hidden = !progress.error;
+  error.textContent = progress.error || '';
+
+  const bar = document.getElementById('purehd-bar');
+  const fill = document.getElementById('purehd-fill');
+  const measured = progress.total > 0 &&
+    (progress.stage === 'download' || progress.stage === 'extract');
+  bar.hidden = !view.busy;
+  bar.classList.toggle('sweeping', view.busy && !measured);
+  fill.style.width = measured ? `${(progress.done / progress.total) * 100}%` : '';
+
+  const note = document.getElementById('purehd-note');
+  const say = fixWords[progress.stage];
+  note.textContent = say ? say(progress) : '';
+  note.classList.toggle('done', progress.stage === 'done');
+}
+
+async function fixTick() {
+  const view = await window.smlGame();
+  showFix(view);
+  // Polling outlives the dialog, like the Java panel's: closing it does not
+  // stop the download, and the strip should still go away when it lands.
+  if (document.getElementById('purehd').hidden && !view.busy) {
+    clearInterval(fixPolling);
+    fixPolling = 0;
+  }
+}
+
+function watchFix() {
+  if (!fixPolling) {
+    fixPolling = setInterval(fixTick, 200);
+  }
+  fixTick();
+}
+
+function openFix() {
+  document.getElementById('purehd').hidden = false;
+  watchFix();
+}
+
+function closeFix() {
+  document.getElementById('purehd').hidden = true;
+}
+
+function wireFix() {
+  document.getElementById('build-fix').addEventListener('click', openFix);
+  document.getElementById('purehd-x').addEventListener('click', closeFix);
+
+  document.getElementById('purehd-cancel').addEventListener('click', () => {
+    if (fixView && fixView.busy) {
+      window.smlGameAbort();
+      watchFix();
+      return;
+    }
+    closeFix();
+  });
+
+  document.getElementById('purehd-get').addEventListener('click', () => {
+    if (fixView && fixView.game.matches) {
+      closeFix();
+      play();
+      return;
+    }
+    window.smlGameFix();
+    watchFix();
+  });
+
+  document.getElementById('purehd-run').addEventListener('click', () => {
+    closeFix();
+    play();
+  });
 }
 
 
@@ -844,6 +981,7 @@ async function start() {
   document.getElementById('flags').value = state.flags || '';
   document.getElementById('debug').checked = !!state.debug;
   wireJava(state);
+  wireFix();
   wireStore();
   wireUpdate();
   // Before `ready` below, so the first thing this page remembers is the
@@ -866,14 +1004,27 @@ async function start() {
   document.getElementById('debug').addEventListener('change', remember);
   ready = true;
 
+  // On a build the addresses do not belong to, Play asks first. Run anyway in
+  // that dialog is the same Play.
   document.getElementById('play').addEventListener('click', () => {
-    const button = document.getElementById('play');
-    button.disabled = true;
-    button.textContent = 'Playing';
-    window.smlPlay(...choice()).then(() => {
-      button.disabled = false;
-      button.textContent = 'Play';
-    });
+    if (mismatched(build)) {
+      openFix();
+      return;
+    }
+    play();
+  });
+}
+
+function play() {
+  const button = document.getElementById('play');
+  if (button.disabled) {
+    return;
+  }
+  button.disabled = true;
+  button.textContent = 'Playing';
+  window.smlPlay(...choice()).then(() => {
+    button.disabled = false;
+    button.textContent = 'Play';
   });
 }
 

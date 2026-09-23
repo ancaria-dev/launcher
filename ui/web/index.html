@@ -24,8 +24,12 @@
 
   <!-- Only ever shown to somebody whose game is not the build the addresses
        were taken from. Above the mods and above Play, because it is about the
-       decision to press Play. -->
-  <p id="build" hidden></p>
+       decision to press Play. Fix? opens the same dialog Play does, for a
+       player who wants to deal with it before trying. -->
+  <div id="build" hidden>
+    <p id="build-text"></p>
+    <button id="build-fix" type="button" class="ghost">Fix?</button>
+  </div>
 
   <main>
     <section class="panel">
@@ -165,6 +169,38 @@
       <div class="actions">
         <button id="jdk-close" type="button" class="ghost">Close</button>
         <button id="jdk-get" type="button">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- The build the addresses belong to. Opened by Fix? and by Play on any
+       other build. Closing it never stops a download: only Abort does, which
+       is why the corner button and the left one are different buttons. -->
+  <div id="purehd" class="overlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="purehd-title">
+      <button id="purehd-x" type="button" class="dismiss" aria-label="Close">&times;</button>
+      <h2 id="purehd-title">Different game build</h2>
+      <p id="purehd-found" class="hint"></p>
+      <p class="hint">You can look for a matching copy of the pureHD mod
+        yourself. If you cannot find one, Download pureHD fetches it from
+        ancaria.dev and installs it for you. Your original game executable is
+        not touched: <code>pureHD.exe</code> and <code>pHD.dll</code> are
+        added next to it, and the launcher starts <code>pureHD.exe</code> from
+        then on. An older copy of either file is moved to
+        <code>launcher\purehd-backup</code> first.</p>
+      <p class="fine">Why pureHD: it fixes a long list of bugs in the original
+        game, leaves the balance alone and keeps the feel of Sacred as it was,
+        and only adds things that are genuinely useful. That is why the loader
+        is built on it.</p>
+
+      <div id="purehd-bar" class="bar" hidden><div id="purehd-fill"></div></div>
+      <p id="purehd-note" class="hint"></p>
+      <p id="purehd-error" class="bad" hidden></p>
+
+      <div class="actions">
+        <button id="purehd-cancel" type="button" class="ghost">Cancel</button>
+        <button id="purehd-get" type="button" class="primary">Download pureHD</button>
+        <button id="purehd-run" type="button" class="risky">Run anyway</button>
       </div>
     </div>
   </div>

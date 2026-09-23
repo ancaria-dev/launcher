@@ -23,6 +23,7 @@ import (
 	"github.com/ancaria-dev/launcher/install"
 	"github.com/ancaria-dev/launcher/java"
 	"github.com/ancaria-dev/launcher/mods"
+	"github.com/ancaria-dev/launcher/purehd"
 	"github.com/ancaria-dev/launcher/registry"
 	"github.com/ancaria-dev/launcher/secret"
 	"github.com/ancaria-dev/launcher/ui"
@@ -52,8 +53,9 @@ func main() {
 	// Which build is in this folder, before anything is started. The addresses
 	// belong to one of the three executables the lookup accepts, and a player
 	// running either of the others is owed that fact while they can still act
-	// on it.
-	build := game.Describe(found.Dir)
+	// on it. The same object can fetch the build that does match, which is why
+	// the answer comes from it rather than from game.Describe directly.
+	fixer := purehd.New(found.Dir, found.LoaderDir())
 
 	// Which java the loader will be started with, decided here rather than left
 	// to the host: without one the zygote never runs and no mod ever loads, and
@@ -70,16 +72,10 @@ func main() {
 	state := ui.State{
 		Version: install.Version(),
 		Java:    javaRow(jdk.Java()),
-		Game: ui.GameRow{
-			Exe:         build.Exe,
-			Version:     build.Version,
-			ExpectedExe: build.ExpectedExe,
-			Expected:    build.Expected,
-			Matches:     build.Matches,
-		},
-		Flags:  strings.Join(settings.Flags, " "),
-		Debug:  settings.Debug,
-		Sealed: secret.Works(),
+		Game:    gameRow(fixer.Snapshot().Build),
+		Flags:   strings.Join(settings.Flags, " "),
+		Debug:   settings.Debug,
+		Sealed:  secret.Works(),
 	}
 	for _, group := range hooks.Ask(filepath.Join(found.LoaderDir(), "protocol.exe")) {
 		row := ui.HookGroup{Module: group.Module}
@@ -135,6 +131,20 @@ func main() {
 		Get:  jdk.Get,
 	}
 
+	fix := ui.Game{
+		View: func() ui.GameView {
+			snapshot := fixer.Snapshot()
+			return ui.GameView{
+				Game:      gameRow(snapshot.Build),
+				Progress:  ui.GameProgress(snapshot.Progress),
+				Busy:      snapshot.Busy,
+				Abortable: snapshot.Abortable,
+			}
+		},
+		Get:   fixer.Get,
+		Abort: fixer.Abort,
+	}
+
 	upgrade := ui.Update{
 		View: func() ui.UpdateView {
 			snapshot := newer.Snapshot()
@@ -188,7 +198,18 @@ func main() {
 			return
 		}
 		session.Wait()
-	}, panel, shelf, upgrade)
+	}, panel, fix, shelf, upgrade)
+}
+
+// gameRow is the build as the page draws it.
+func gameRow(build game.Build) ui.GameRow {
+	return ui.GameRow{
+		Exe:         build.Exe,
+		Version:     build.Version,
+		ExpectedExe: build.ExpectedExe,
+		Expected:    build.Expected,
+		Matches:     build.Matches,
+	}
 }
 
 // javaRow is the JDK as the page draws it.

@@ -109,10 +109,13 @@ type Choice func(enabled, offHooks []string, flags string, debug bool)
 // jdk is the Java panel.  It is separate from State because it is the one thing
 // on this page that changes while the page is open.
 //
+// fix is the pureHD fetcher behind the build strip's Fix? button and the
+// dialog Play opens on a build the addresses do not belong to.
+//
 // up is the launcher upgrading itself.  Its Apply never comes back to a
 // window: Terminate is handed to it, so the last thing the old launcher does
 // is close after starting the new one.
-func Run(state State, remember, play Choice, jdk Java, store Store, up Update) {
+func Run(state State, remember, play Choice, jdk Java, fix Game, store Store, up Update) {
 	// Before any window exists: afterwards Windows has already decided how to
 	// treat this process and scales its output as a bitmap.
 	awareOfDPI()
@@ -144,6 +147,10 @@ func Run(state State, remember, play Choice, jdk Java, store Store, up Update) {
 	view.Bind("smlJava", jdk.View)
 	view.Bind("smlJavaLoad", jdk.Load)
 	view.Bind("smlJavaGet", jdk.Get)
+
+	view.Bind("smlGame", fix.View)
+	view.Bind("smlGameFix", fix.Get)
+	view.Bind("smlGameAbort", fix.Abort)
 
 	view.Bind("smlUpdate", up.View)
 	view.Bind("smlUpdateGet", up.Get)
