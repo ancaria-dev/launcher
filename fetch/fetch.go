@@ -8,6 +8,7 @@
 package fetch
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -31,7 +32,7 @@ var Transport http.RoundTripper = http.DefaultTransport
 // not be able to fill the machine's memory before anybody notices.
 func Bytes(url string, head http.Header, limit int64) ([]byte, error) {
 	client := &http.Client{Transport: Transport, Timeout: 20 * time.Second}
-	response, err := send(client, url, head)
+	response, err := send(context.Background(), client, url, head)
 	if err != nil {
 		return nil, err
 	}
@@ -57,9 +58,16 @@ func Bytes(url string, head http.Header, limit int64) ([]byte, error) {
 // at. The hash would catch the same lie afterwards, which is no use to somebody
 // whose disk filled up while it was being told.
 func File(url string, head http.Header, path string, max int64, progress func(done, total int64)) (string, error) {
+	return FileContext(context.Background(), url, head, path, max, progress)
+}
+
+// FileContext is File that stops when ctx is cancelled, for the one download a
+// player can abort.  What was written so far is deleted the same way a
+// dropped connection's is.
+func FileContext(ctx context.Context, url string, head http.Header, path string, max int64, progress func(done, total int64)) (string, error) {
 	// No overall timeout. A transfer here can be minutes long by design, and a
 	// deadline meant for an index would abort it halfway every time.
-	response, err := send(&http.Client{Transport: Transport}, url, head)
+	response, err := send(ctx, &http.Client{Transport: Transport}, url, head)
 	if err != nil {
 		return "", err
 	}
@@ -116,8 +124,8 @@ func Copy(into io.Writer, from io.Reader, total int64, progress func(done, total
 	}
 }
 
-func send(client *http.Client, url string, head http.Header) (*http.Response, error) {
-	request, err := http.NewRequest(http.MethodGet, url, nil)
+func send(ctx context.Context, client *http.Client, url string, head http.Header) (*http.Response, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
