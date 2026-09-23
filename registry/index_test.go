@@ -140,10 +140,10 @@ func TestLabelIsShortEnoughToPrintUnderAName(t *testing.T) {
 func TestMergeOffersBothSidesOfAConflictAndNamesIt(t *testing.T) {
 	remote := Remote{URL: "u", Raw: "r"}
 	indexes := map[string]*Index{"u": {Mods: []Entry{
-		{ID: "self-check", Name: "Self Check", API: "2",
+		{ID: "self-check", Name: "Self Check", API: "3",
 			Conflicts: []string{"old-huge-potions"}},
-		{ID: "old-huge-potions", Name: "Old Huge Potions", API: "2"},
-		{ID: "all-my-runes", Name: "All My Runes", API: "2"},
+		{ID: "old-huge-potions", Name: "Old Huge Potions", API: "3"},
+		{ID: "all-my-runes", Name: "All My Runes", API: "3"},
 	}}}
 	offers, _ := Merge(here, nil, indexes, []Remote{remote})
 	if len(offers) != 3 {
@@ -200,7 +200,7 @@ func TestCautionReadsAsASentence(t *testing.T) {
 // naming nothing the player can act on.
 func TestMergeSaysNothingAboutAConflictNobodyCanSee(t *testing.T) {
 	indexes := map[string]*Index{"u": {Mods: []Entry{
-		{ID: "lonely", Name: "Lonely", API: "2", Conflicts: []string{"absent"}},
+		{ID: "lonely", Name: "Lonely", API: "3", Conflicts: []string{"absent"}},
 	}}}
 	offers, _ := Merge(here, nil, indexes, []Remote{{URL: "u"}})
 	if len(offers) != 1 || offers[0].Caution != "" {
@@ -211,9 +211,9 @@ func TestMergeSaysNothingAboutAConflictNobodyCanSee(t *testing.T) {
 func TestMergeKeepsAwayFromWhatIsAlreadyInstalled(t *testing.T) {
 	remote := Remote{URL: "u"}
 	indexes := map[string]*Index{"u": {Mods: []Entry{
-		{ID: "self-check", API: "2", Version: "0.2.0"},
-		{ID: "old-huge-potions", API: "2"},
-		{ID: "all-my-runes", API: "2"},
+		{ID: "self-check", API: "3", Version: "0.2.0"},
+		{ID: "old-huge-potions", API: "3"},
+		{ID: "all-my-runes", API: "3"},
 	}}}
 	installed := []mods.Mod{
 		{ID: "self-check", Version: "0.1.0", Conflicts: []string{"all-my-runes"}},
@@ -244,8 +244,8 @@ func TestMergeSaysNothingWhenTwoRepositoriesOfferOneId(t *testing.T) {
 	one := Remote{URL: "one"}
 	two := Remote{URL: "two"}
 	indexes := map[string]*Index{
-		"one": {Mods: []Entry{{ID: "same", API: "2", Version: "1"}}},
-		"two": {Mods: []Entry{{ID: "same", API: "2", Version: "2"}}},
+		"one": {Mods: []Entry{{ID: "same", API: "3", Version: "1"}}},
+		"two": {Mods: []Entry{{ID: "same", API: "3", Version: "2"}}},
 	}
 	offers, _ := Merge(here, nil, indexes, []Remote{one, two})
 	if len(offers) != 0 {
@@ -271,8 +271,8 @@ func TestMergeShowsAModBuiltForAnotherLoader(t *testing.T) {
 // asked for in the sentence under it.
 func TestMergeRefusesAnOfferPinnedToANewerLauncher(t *testing.T) {
 	indexes := map[string]*Index{"u": {Mods: []Entry{
-		{ID: "future", API: "[2,3)", Loader: "[0.2.0,)"},
-		{ID: "present", API: "[2,3)", Loader: "[0.1.0,)"},
+		{ID: "future", API: "[3,4)", Loader: "[0.2.0,)"},
+		{ID: "present", API: "[3,4)", Loader: "[0.1.0,)"},
 	}}}
 	offers, _ := Merge(here, nil, indexes, []Remote{{URL: "u"}})
 	if len(offers) != 2 {

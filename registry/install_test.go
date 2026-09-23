@@ -92,7 +92,7 @@ func entry(server *repo, id, version string, jar []byte, digest string) string {
 
 func TestResolveTriesEveryShapeUntilOneAnswers(t *testing.T) {
 	server := serve(t)
-	jar := modJar(t, "a-mod", "1.0.0", "2")
+	jar := modJar(t, "a-mod", "1.0.0", "3")
 	server.put(IndexFile, index(server, entry(server, "a-mod", "1.0.0", jar, sum(jar))))
 
 	remote, found, err := Resolve(server.clone(), "")
@@ -122,7 +122,7 @@ func TestResolveSaysWhenThereIsNoIndex(t *testing.T) {
 
 func TestInstallLeavesTheJarWhereTheLoaderLooks(t *testing.T) {
 	server := serve(t)
-	jar := modJar(t, "a-mod", "1.0.0", "2")
+	jar := modJar(t, "a-mod", "1.0.0", "3")
 	server.files["/jars/a-mod.jar"] = jar
 	server.put(IndexFile, index(server, entry(server, "a-mod", "1.0.0", jar, sum(jar))))
 
@@ -144,7 +144,7 @@ func TestInstallLeavesTheJarWhereTheLoaderLooks(t *testing.T) {
 
 	// An update: same id, new version, and the old jar is gone rather than
 	// sitting beside it for the loader to choose between.
-	newer := modJar(t, "a-mod", "2.0.0", "2")
+	newer := modJar(t, "a-mod", "2.0.0", "3")
 	server.files["/jars/a-mod.jar"] = newer
 	server.put(IndexFile, index(server, entry(server, "a-mod", "2.0.0", newer, sum(newer))))
 	updated, _, err := Load(remote)
@@ -162,8 +162,8 @@ func TestInstallLeavesTheJarWhereTheLoaderLooks(t *testing.T) {
 
 func TestInstallRefusesBytesThatAreNotWhatWasPublished(t *testing.T) {
 	server := serve(t)
-	jar := modJar(t, "a-mod", "1.0.0", "2")
-	other := modJar(t, "a-mod", "9.9.9", "2")
+	jar := modJar(t, "a-mod", "1.0.0", "3")
+	other := modJar(t, "a-mod", "9.9.9", "3")
 	server.files["/jars/a-mod.jar"] = other
 	server.put(IndexFile, index(server, entry(server, "a-mod", "1.0.0", jar, sum(jar))))
 
@@ -184,7 +184,7 @@ func TestInstallRefusesBytesThatAreNotWhatWasPublished(t *testing.T) {
 func TestInstallRefusesAJarThatIsNotTheModItWasOfferedAs(t *testing.T) {
 	server := serve(t)
 	// The index offers a-mod. The jar behind it says it is something else.
-	jar := modJar(t, "something-else", "1.0.0", "2")
+	jar := modJar(t, "something-else", "1.0.0", "3")
 	server.files["/jars/a-mod.jar"] = jar
 	server.put(IndexFile, index(server, entry(server, "a-mod", "1.0.0", jar, sum(jar))))
 

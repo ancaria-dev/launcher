@@ -11,7 +11,7 @@ import (
 // it in the other list switched on.
 func TestWorkGoesFromAnEmptyFolderToAnInstalledMod(t *testing.T) {
 	server := serve(t)
-	jar := modJar(t, "a-mod", "1.0.0", "2")
+	jar := modJar(t, "a-mod", "1.0.0", "3")
 	server.files["/jars/a-mod.jar"] = jar
 	server.put(IndexFile, index(server, entry(server, "a-mod", "1.0.0", jar, sum(jar))))
 
