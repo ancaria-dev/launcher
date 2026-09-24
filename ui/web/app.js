@@ -289,8 +289,8 @@ function showBuild(game) {
   const label = document.createElement('strong');
   label.textContent = 'Different game build.';
   document.getElementById('build-text').replaceChildren(label,
-    ` Found ${describe(game)}. This loader targets ` +
-    `${game.expectedExe} ${game.expected}, so mods may not work correctly.`);
+    ` Found ${describe(game)}. Mods are made for ` +
+    `${game.expectedExe} ${game.expected} and may not work with it.`);
   notice.hidden = false;
 }
 
@@ -314,10 +314,10 @@ function showFix(view) {
   showBuild(game);
 
   document.getElementById('purehd-found').textContent = mismatched(game)
-    ? `This launcher found ${describe(game)}. Every address the mod loader ` +
-      `hooks was taken from ${game.expectedExe} ${game.expected}, and the ` +
-      "game's functions sit at different addresses in other builds, so mods " +
-      'will most likely not work with this one and may crash the game.'
+    ? `This launcher found ${describe(game)}. The loader takes every ` +
+      `game address from ${game.expectedExe} ${game.expected}. Other builds ` +
+      'keep their functions elsewhere, so mods will probably fail here and ' +
+      'may crash the game.'
     : `${describe(game)} is the build the mod loader was made for.`;
 
   const cancel = document.getElementById('purehd-cancel');
@@ -453,7 +453,7 @@ function showJava(java) {
     line.append(label, ` The loader needs Java ${java.minimum} or newer. ` +
       `Sacred will start, but no mods will load.`);
   } else {
-    label.textContent = 'Java was not found.';
+    label.textContent = 'No Java found.';
     line.append(label, ` Sacred will start, but no mods will load. ` +
       `The loader needs Java ${java.minimum} or newer.`);
   }
@@ -651,7 +651,7 @@ function renderOffers() {
 
   nothing.hidden = offers.length > 0;
   nothing.textContent = sources.some(s => s.error)
-    ? 'No mods available. A repository did not respond. Check Repositories.'
+    ? 'No mods to show. A repository didn’t respond. Check Repositories.'
     : 'All available mods are already installed.';
 
   for (const mod of offers) {
@@ -844,12 +844,12 @@ function wireStore() {
   // What happens to a token is a promise, so the page says which promise it is
   // actually able to make on this machine.
   document.getElementById('source-hint').textContent = sealed
-    ? 'Access tokens are encrypted with your Windows account before they are ' +
-      'saved. They cannot be used from another account or computer. Public ' +
-      'repositories do not need a token.'
-    : 'Windows cannot encrypt access tokens on this computer. Any token you ' +
-      'enter will be saved as plain text in launcher.json. Leave this field ' +
-      'empty unless you accept that risk.';
+    ? 'The launcher encrypts tokens with your Windows account before ' +
+      'saving them. No other account or computer can use them. Public ' +
+      'repositories need no token.'
+    : 'Windows can’t encrypt tokens on this computer, so a token you enter ' +
+      'is saved as plain text in launcher.json. Leave the field empty unless ' +
+      'you accept that.';
 
   storePace(false);
 }

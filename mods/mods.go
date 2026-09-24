@@ -140,8 +140,8 @@ func (l Loader) Read(path string) (Mod, bool) {
 // mods have no opinion about and should not have to write down.
 func (l Loader) Refuse(api, loader string) string {
 	if strings.TrimSpace(api) == "" {
-		return "This mod does not declare its loader API, so compatibility cannot " +
-			"be checked. Rebuild it with a current toolchain."
+		return "This mod does not declare its loader API, so the launcher can’t " +
+			"check it. Rebuild it with a current toolchain."
 	}
 	wanted, err := pin.ParseRange(api)
 	if err != nil {

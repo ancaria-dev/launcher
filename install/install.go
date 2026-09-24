@@ -43,8 +43,8 @@ func Find() (*Game, error) {
 	dir := filepath.Dir(exe)
 	if game.Find(dir) == "" {
 		return nil, errors.New(
-			"No game was found next to this file (" + game.Missing() + "). Move " +
-				"Sacred Mod Loader.exe into the Sacred Gold folder that contains " +
+			"No game next to this file (" + game.Missing() + "). Move " +
+				"Sacred Mod Loader.exe into your Sacred Gold folder, next to " +
 				"the game executable")
 	}
 	return &Game{Dir: dir}, nil

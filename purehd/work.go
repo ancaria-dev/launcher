@@ -135,7 +135,7 @@ func (w *Work) Get() {
 		w.build = build
 		switch {
 		case err != nil && ctx.Err() != nil:
-			w.progress = Progress{Stage: StageAborted, Note: "Download aborted. Nothing in the game folder was changed"}
+			w.progress = Progress{Stage: StageAborted, Note: "Download stopped. Nothing in the game folder changed"}
 		case err != nil:
 			w.progress = Progress{Stage: StageFailed, Error: err.Error()}
 		default:

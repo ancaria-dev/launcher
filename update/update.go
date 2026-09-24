@@ -182,7 +182,7 @@ func check(path string, expected int64) error {
 		return err
 	}
 	if magic != [2]byte{'M', 'Z'} {
-		return errors.New("What arrived is not a Windows executable")
+		return errors.New("The download is not a Windows executable")
 	}
 	return nil
 }

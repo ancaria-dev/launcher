@@ -47,8 +47,8 @@
 
       <div id="page-installed">
         <ul id="mods"></ul>
-        <p id="empty" hidden>No mods installed yet. Browse Available to find
-          some.</p>
+        <p id="empty" hidden>No mods installed yet. Find some on the
+          Available tab.</p>
       </div>
 
       <div id="page-available" hidden>
@@ -76,8 +76,8 @@
         <div class="drawer">
           <div>
             <p class="hint">Each hook is a point where the loader attaches to
-              the game. Turn one off to stop its events. This can help you find
-              a faulty hook. Click a module name to toggle all its hooks.</p>
+              the game. Turn a hook off to stop its events, for example to track
+              down a faulty one. Click a module name to switch all its hooks.</p>
             <div id="hooks"></div>
           </div>
         </div>
@@ -115,9 +115,9 @@
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="sources-title">
       <h2 id="sources-title">Mod repositories</h2>
       <p class="hint">A mod repository is a Git repository with
-        <code>sacred.mods.repository.json</code> in its root. The launcher
-        reads this file and its images without cloning the repository. Downloaded
-        mods do not run until you press Play.</p>
+        <code>sacred.mods.repository.json</code> at its root. The launcher
+        reads that file and its images without cloning anything. Downloaded
+        mods don’t run until you press Play.</p>
 
       <ul id="source-list"></ul>
 
@@ -145,11 +145,10 @@
   <div id="jdk" class="overlay" hidden>
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="jdk-title">
       <h2 id="jdk-title">Get Java</h2>
-      <p class="hint">Mods run in a Java virtual machine beside the game.
-        Without a JDK, Sacred still launches but no mods load. The launcher
-        downloads the JDK to <code>launcher\java</code> in the game folder. It
-        does not install anything elsewhere, and deleting the game folder also
-        removes the JDK.</p>
+      <p class="hint">Mods run in Java, next to the game. Without a JDK,
+        Sacred still starts, but no mods load. The launcher puts the JDK in
+        <code>launcher\java</code> inside the game folder and nowhere else, so
+        deleting the game folder removes it too.</p>
 
       <div class="pair">
         <label class="field">
@@ -181,17 +180,15 @@
       <button id="purehd-x" type="button" class="dismiss" aria-label="Close">&times;</button>
       <h2 id="purehd-title">Different game build</h2>
       <p id="purehd-found" class="hint"></p>
-      <p class="hint">You can look for a matching copy of the pureHD mod
-        yourself. If you cannot find one, Download pureHD fetches it from
-        ancaria.dev and installs it for you. Your original game executable is
-        not touched: <code>pureHD.exe</code> and <code>pHD.dll</code> are
-        added next to it, and the launcher starts <code>pureHD.exe</code> from
-        then on. An older copy of either file is moved to
-        <code>launcher\purehd-backup</code> first.</p>
-      <p class="fine">Why pureHD: it fixes a long list of bugs in the original
-        game, leaves the balance alone and keeps the feel of Sacred as it was,
-        and only adds things that are genuinely useful. That is why the loader
-        is built on it.</p>
+      <p class="hint">Download pureHD fetches the matching build from
+        ancaria.dev and installs it. You can also find a copy yourself. Your
+        original game executable stays as it is: the launcher adds
+        <code>pureHD.exe</code> and <code>pHD.dll</code> next to it and starts
+        <code>pureHD.exe</code> from then on. It first moves any older copy of
+        those files to <code>launcher\purehd-backup</code>.</p>
+      <p class="fine">Why pureHD? It fixes a long list of bugs in the original
+        game, keeps the balance and the feel of Sacred, and adds only what’s
+        truly useful. That’s why the loader builds on it.</p>
 
       <div id="purehd-bar" class="bar" hidden><div id="purehd-fill"></div></div>
       <p id="purehd-note" class="hint"></p>
@@ -212,9 +209,9 @@
   <div id="updater" class="overlay" hidden>
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="updater-title">
       <h2 id="updater-title">Update Sacred Mod Loader</h2>
-      <p class="hint">The whole loader travels inside this one file, so the
-        update replaces it and starts the new one. Your mods, your settings and
-        any Java the launcher downloaded stay where they are.</p>
+      <p class="hint">The whole loader lives in this one file. The update
+        replaces it and starts the new version. Your mods, settings, and
+        downloaded Java stay where they are.</p>
 
       <div id="update-bar" class="bar" hidden><div id="update-fill"></div></div>
       <p id="update-note" class="hint"></p>
