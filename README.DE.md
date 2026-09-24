@@ -11,241 +11,164 @@
 
 # Sacred Mod Loader
 
-Eine Datei im Ordner von Sacred Gold genügt. Der Launcher bringt den gesamten
-Mod-Loader mit, zeigt installierte und verfügbare Mods an und startet das Spiel
-mit deiner Auswahl.
+Eine einzige EXE, die Mods für Sacred Gold installiert und das Spiel mit ihnen
+startet.
 
-## Für Spieler
+Der Launcher trägt den ganzen Mod-Loader in sich. Du legst ihn in den
+Spielordner, wählst Mods aus einer Liste und drückst auf Play. Den Rest
+erledigt er selbst: Er lädt die Mods herunter, prüft sie und merkt sich deine
+Auswahl.
 
-1. Lege `Sacred Mod Loader.exe` in den Ordner mit `pureHD.exe`, `Sacred.exe`
-   oder `Game.exe`.
-2. Starte die Datei. Beim ersten Start legt der Launcher neben dem Spiel die
-   Ordner `launcher` und `mods` an. Nach einem Versionswechsel aktualisiert er
-   die Dateien in `launcher`.
-3. Wähle die gewünschten Mods aus und klicke auf Play.
+Deine Spieldateien ändert der Launcher nicht. Er legt alles im Spielordner ab,
+zum Entfernen löschst du also einfach diesen Ordner.
 
-Während des Spielens blendet sich der Launcher aus. Sobald du das Spiel
-beendest, erscheint er wieder. Zuerst startet er `launcher\protocol.exe`, danach
-das Spiel. Wenn das Spiel beendet wird, stoppt er auch den Host.
+## Erste Schritte
 
-Die EXE enthält den Loader, aber keine Mods. Du kannst Mods über den Reiter
-Available installieren oder JAR-Dateien selbst in `mods` ablegen. Eine JAR mit
-lesbarer `META-INF/declaration.toml` erscheint beim nächsten Start unter
-Installed.
+1. Lade `Sacred Mod Loader.exe` aus den
+   [Releases](https://github.com/ancaria-dev/launcher/releases) herunter.
+2. Leg die Datei in deinen Sacred-Gold-Ordner, neben `pureHD.exe`,
+   `Sacred.exe` oder `Game.exe`.
+3. Starte sie. Neben dem Spiel erscheinen die Ordner `launcher` und `mods`.
+4. Wähl im Tab Available Mods aus und installier sie.
+5. Drück auf Play.
 
-Jede Änderung wird sofort in `launcher\launcher.json` gespeichert. Ausgewählte
-Mods, deaktivierte Hooks, zusätzliche Spielparameter, Repositories und die
-Konsoleneinstellung bleiben auch erhalten, wenn du das Fenster ohne Play
-schließt.
+Während du spielst, ist der Launcher ausgeblendet. Sobald du Sacred beendest,
+kommt er zurück.
 
-Mods sind in Java geschrieben. Der Loader führt sie in einer eigenen JVM neben
-dem Spiel aus. Ohne geeignetes JDK startet Sacred zwar normal, aber kein Mod
-wird geladen. Deshalb zeigt der Launcher schon vor dem Klick auf Play an,
-welche Java-Installation er gefunden hat.
-
-Er sucht an drei Stellen: zuerst in `launcher\java`, danach unter
-`$JAVA_HOME\bin\java.exe` und zuletzt nach `java` im `PATH`. Verwendet wird der
-erste Fund mit Java 21 oder neuer. Ist keiner geeignet, nennt die Zeile über
-Play trotzdem die zuerst gefundene Java-Version und erklärt, weshalb sie für
-den Loader zu alt ist.
-
-Findet der Launcher kein geeignetes JDK, färbt sich diese Zeile rot und daneben
-erscheint die Schaltfläche Get Java. Sie öffnet ein kleines Fenster mit zwei
-Auswahllisten. Die Angaben stammen von
-[foojay](https://api.foojay.io/disco/v3.0/), dem Verzeichnisdienst hinter
-javaalmanac.io. Angeboten werden gepflegte, verfügbare OpenJDK-Distributionen
-und unterstützte GA-Versionen ab Java 21. Die Listen sind nicht fest im
-Launcher hinterlegt und können deshalb auch später veröffentlichte
-Distributionen enthalten. Vorausgewählt ist Oracle 25. Je nach gewähltem Build
-gibt es nicht für jede Kombination ein Windows-Archiv. Das voreingestellte
-Archiv ist ungefähr 200 MB groß. Während des Downloads zeigt die
-Fortschrittsanzeige Datenmenge und Prozentwert an. Danach wechselt sie zum
-Entpacken.
-
-Das JDK landet ausschließlich in `launcher\java` im Spielordner. Der Launcher
-ändert weder den `PATH` noch die Windows-Registrierung und installiert nichts
-an anderer Stelle. Wenn du den Ordner von Sacred Gold löschst, wird auch dieses
-JDK entfernt. Wenn foojay für den gewählten Build eine SHA-256-Prüfsumme
-veröffentlicht, kontrolliert der Launcher den Download damit. Unvollständige
-Dateien und Archive mit falscher Prüfsumme werden gelöscht. Entpackt wird in
-einen temporären Ordner, sodass ein fehlgeschlagenes Update das vorhandene JDK
-nicht beschädigt.
-
-## Den Launcher aktualisieren
-
-Der gesamte Loader steckt in einer einzigen EXE, ein Update ist also: Datei
-ersetzen und neu starten. Beim Start fragt der Launcher GitHub, ob es ein
-neueres Release gibt. Wenn ja, erscheint unter der Version im Kopf die Zeile
-**Version X is available. Download & install now**. Gibt es keines, oder ist
-GitHub nicht erreichbar, erscheint gar nichts.
-
-Der Link öffnet ein Fenster, das den Download sofort startet und sich nicht
-schließen lässt, solange er läuft. Die Datei landet in `launcher\update`
-innerhalb des Spielordners, nie in `%TEMP%` und nie außerhalb des
-Spielordners. Ist der Download fertig, erscheint **Install & Restart**. Der
-Launcher setzt die neue Datei an seine eigene Stelle, startet sie und beendet
-sich. Die alte bleibt als `Sacred Mod Loader.exe.old` daneben liegen und wird
-beim nächsten Start entfernt.
-
-Mods, Einstellungen und ein heruntergeladenes Java bleiben unberührt. Geht
-etwas schief, nennt das Fenster den Grund und bietet die Release-Seite als Link
-an, der im Browser geöffnet wird.
+Jede Auswahl speichert er sofort in `launcher\launcher.json`. Deine Mods,
+Flags und übrigen Einstellungen bleiben erhalten, auch wenn du das Fenster
+ohne zu spielen schließt.
 
 ## Mods und Repositories
 
-Installed zeigt die Mods aus `<Spielordner>\mods`. Der Launcher liest ihre
-Deskriptoren als normale ZIP-Einträge und führt vor Play keinen Java-Code aus.
-Installierte Mods lassen sich aktivieren, deaktivieren, aktualisieren oder
-löschen.
+Der Tab Installed zeigt die Mods im Ordner `mods`. Du kannst jeden davon
+einschalten, ausschalten, aktualisieren oder entfernen. Ein JAR, das du selbst
+nach `mods` kopierst, taucht hier beim nächsten Start auf.
 
-Available lädt zunächst
-`https://github.com/ancaria-dev/mods.git`. Eine weitere Quelle braucht eine
-HTTPS-Clone-URL mit der Endung `.git` und eine
-`sacred.mods.repository.json` im Stammverzeichnis. Der Launcher lädt nur den
-Index, die benötigten JAR-Dateien und Bilder. Er startet Git nicht und klont
-auch nicht das gesamte Repository.
+Der Tab Available zeigt Mods aus Repositories. Das offizielle,
+[ancaria-dev/mods](https://github.com/ancaria-dev/mods), ist von Anfang an
+dabei. Ein eigenes fügst du über Repositories hinzu: Füg eine HTTPS-Clone-URL
+ein, die auf `.git` endet. Im Wurzelverzeichnis muss
+`sacred.mods.repository.json` liegen. Git brauchst du dafür nicht.
 
-Bevor eine heruntergeladene JAR in `mods` bleibt, prüft der Launcher den
-SHA-256-Wert aus dem Index, die Mod-ID in der JAR sowie deren API- und
-Loader-Versionsbereiche. Schlägt eine Prüfung fehl, wird die Datei entfernt.
+Vor der Installation prüft der Launcher jeden Mod: die Prüfsumme, die ID im JAR
+und die Kompatibilität mit dieser Loader-Version. Fällt ein Mod durch, wird er
+nicht installiert.
 
-Auch ein Mod, der eine andere API- oder Loader-Version verlangt, bleibt in der
-Liste sichtbar. Er ist ausgegraut, lässt sich nicht auswählen und wird nicht
-gestartet. Eine rote Meldung nennt den nicht erfüllten Versionsbereich. So ist
-sofort erkennbar, dass der Mod für die aktuelle Version neu gebaut oder
-angepasst werden muss.
+Ist ein Mod für eine andere Loader-Version gebaut, bleibt er in der Liste,
+lässt sich aber nicht einschalten. Eine rote Zeile unter der Beschreibung sagt,
+warum. Beheben kann das nur der Autor des Mods.
 
-Für private Repositories kann ein Zugriffstoken hinterlegt werden. Funktioniert
-Windows DPAPI, verschlüsselt der Launcher das Token für das aktuelle
-Windows-Konto, bevor er es in `launcher\launcher.json` speichert. Unter einem
-anderen Konto oder auf einem anderen Computer lässt sich der Wert nicht
-entschlüsseln. Ist DPAPI nicht verfügbar, warnt die Oberfläche vor der
-Speicherung als Klartext.
+Ein privates Repository braucht einen Zugriffstoken. Der Launcher verschlüsselt
+ihn mit deinem Windows-Konto, auf einem anderen Rechner ist er also nicht
+lesbar. Kann Windows den Token nicht verschlüsseln, warnt dich der Launcher,
+dass er ihn im Klartext speichert.
 
-Alle vom Loader verwendeten Adressen stammen aus `pureHD.exe` 2.0.2.118, dem
-HD-Wrapper der Community. Erkennt der Launcher eine andere ausführbare Datei,
-Version oder keine Versionsangabe, zeigt er über der Mod-Liste eine Warnung mit
-dem gefundenen und dem erwarteten Build sowie eine Schaltfläche Fix? an. Play
-öffnet zuerst einen Dialog mit drei Möglichkeiten: Cancel, Download pureHD und
-Run anyway. Run anyway startet das Spiel so, wie es ist, und ausgewählte Mods
-werden trotzdem geladen. Da die betreffenden Stellen in einer anderen EXE an
-anderen Adressen liegen können, funktionieren einzelne Mods möglicherweise nicht
-oder verhalten sich unerwartet.
+## Java
 
-Download pureHD lädt `sacred.purehd.zip` von ancaria.dev, prüft die Datei gegen
-die im Launcher hinterlegte SHA-256 und legt `pureHD.exe` und `pHD.dll` neben
-das Spiel. Die ursprüngliche ausführbare Datei bleibt unberührt, eine ältere
-Kopie einer der beiden Dateien wird vorher nach `launcher\purehd-backup`
-verschoben. Das Schließen des Dialogs bricht den Download nicht ab, das tut
-nur Abort. Nach der Installation verschwindet die Warnung, und Play startet
-`pureHD.exe`.
+Mods laufen mit Java 21 oder neuer. Ohne Java startet das Spiel trotzdem,
+aber es lädt keine Mods. Welches Java der Launcher gefunden hat, steht über dem
+Play-Button.
 
-Die Originaldateien des Spiels bleiben unverändert. Der Loader setzt seine
-Hooks ausschließlich im Speicher des laufenden Prozesses. Beim Beenden des
-Spiels verschwinden diese Änderungen wieder. Keine Datei der
-Originalinstallation wird gepatcht, umbenannt oder ersetzt.
-Der Launcher schreibt nur eigene Dateien nach `launcher` und vom Nutzer
-verwaltete JAR-Dateien nach `mods`, dazu auf Wunsch `pureHD.exe` und `pHD.dll`
-neben das Spiel.
+Der Launcher sucht an drei Stellen und nimmt das erste passende Java:
 
-Neben der Mod-Liste befinden sich zwei weitere Einstellungen. Der Inhalt des
-Feldes Flags wird an Leerraum in einzelne Argumente zerlegt und an das Spiel
-weitergereicht. Mit der Checkbox darunter öffnest du während des Spielens eine
-Konsole mit dem Protokoll des Hosts. Der Kommandozeilenschalter `--debug` öffnet
-die Konsole sofort und aktiviert die Checkbox für diese Sitzung.
+1. `launcher\java` im Spielordner
+2. `JAVA_HOME`
+3. `PATH`
 
-Unter der Mod-Liste befindet sich der zunächst eingeklappte Bereich Hooks.
-Jeder Eintrag steht für eine Stelle im Spiel, an der der Loader Code einhängt.
-Wird ein Hook deaktiviert, bleibt die zugehörige Instruktion unberührt. Für die
-Fehlersuche lässt sich mit einem Klick auf einen Modulnamen eine ganze Gruppe
-abschalten. Ein weiterer Spielstart zeigt dann, ob der Fehler in diesem Bereich
-liegt, ohne dass zwischen den Starts JavaScript geändert werden muss.
+Passt keins, klick auf Get Java. Wähl eine Distribution und eine Version, und
+der Launcher lädt ein JDK nach `launcher\java`. Die Listen kommen aus dem
+Katalog von [foojay](https://api.foojay.io/disco/v3.0/), vorausgewählt sind
+Oracle und Java 25. PATH, Registry und alles außerhalb des Spielordners
+bleiben unberührt.
 
-Liegt Sacred Gold unter `Program Files`, muss der Launcher als Administrator
-ausgeführt werden. Andernfalls darf er nicht in den Spielordner schreiben. Die
-gleichen Rechte sind nötig, wenn das Spiel selbst als Administrator läuft.
-Sonst kann sich der Frida-Host nicht an den Prozess anhängen.
+Veröffentlicht foojay eine Prüfsumme, gleicht der Launcher das Archiv damit ab.
+Ein fehlerhafter Download wird gelöscht, und das JDK, das du schon hattest,
+läuft weiter.
+
+## Spielversion
+
+Der Loader ist für `pureHD.exe` 2.0.2.118 gebaut, eine Community-Fassung von
+Sacred Gold mit HD-Unterstützung und Fehlerkorrekturen. Liegt in deinem Ordner
+eine andere Version, zeigt der Launcher eine Warnung mit dem Button Fix?.
+
+Dann öffnen Fix? und Play einen Dialog mit drei Buttons:
+
+- **Download pureHD** lädt die passende Fassung von ancaria.dev, prüft sie und
+  legt `pureHD.exe` und `pHD.dll` neben das Spiel. Deine ursprüngliche EXE
+  bleibt, wo sie ist. Ältere Kopien der beiden Dateien verschiebt der Launcher
+  vorher nach `launcher\purehd-backup`.
+- **Run anyway** startet das Spiel, wie es ist. Mods können dann versagen oder
+  das Spiel abstürzen lassen, denn eine andere Fassung hat ihren Code an
+  anderen Adressen.
+- **Cancel** schließt den Dialog.
+
+## Aktualisieren
+
+Erscheint eine neue Version, taucht unter der Versionsnummer im Kopf der Link
+**Download & install now** auf. Der Launcher lädt die neue EXE in den
+Spielordner, und **Install & Restart** tauscht sie aus und startet neu. Deine
+Mods, Einstellungen und das heruntergeladene Java bleiben, wo sie sind.
+
+Ist GitHub nicht erreichbar oder gibt es nichts Neues, zeigt der Launcher gar
+nichts an.
+
+## Einstellungen und Fehlersuche
+
+- **Extra flags for Sacred** gibt dem Spiel zusätzliche
+  Kommandozeilenargumente mit.
+- **Show the console while playing** öffnet eine Konsole mit dem Log des Hosts.
+  `Sacred Mod Loader.exe --debug` schaltet sie gleich beim Start ein.
+- **Hooks** ist eine eingeklappte Liste der Stellen, an denen sich der Loader
+  ins Spiel einhängt. Schalte Stellen ab, um die zu finden, die Ärger macht.
+  Ein Klick auf einen Modulnamen schaltet die ganze Gruppe um.
+
+Liegt Sacred Gold unter `Program Files`, starte den Launcher als
+Administrator, sonst lässt Windows ihn nicht in den Spielordner schreiben.
+Läuft das Spiel selbst als Administrator, braucht der Launcher dieselben
+Rechte.
 
 ## Bauen
 
-Für den Build ist Go 1.26 erforderlich. Liegt `protocol` oder `coderpack` neben
-diesem Repository, baut das Skript die jeweilige Komponente aus dem Quellcode
-und lädt die fehlende Komponente herunter. Die Reihenfolge ist dabei
-festgelegt: zuerst coderpack, damit dessen Adresstabelle vorliegt, dann der
-Host, dem über `PROTOCOL_AGENT` gesagt wird, welchen Agenten er einbetten soll.
-Für einen vollständigen Quell-Build
-werden zusätzlich JDK 21, Python 3.11 und Rust 1.98 mit MSVC-Toolchain und LLVM
-benötigt. `frida-sys` führt bindgen aus und braucht dafür libclang.
-
-Fehlen die benachbarten Repositories, lädt das Skript `protocol.exe`,
-`api.jar` und `zygote.jar` aus den Releases herunter, deren Versionen in
-`dependencies.json` festgelegt sind. Derzeit sind das `protocol` mit `0.101.0`
-und `coderpack` mit `0.102.0`. In diesem Fall genügt Go: Der Agent wird nicht
-gesondert geladen, denn sein JavaScript steckt samt Adresstabelle minifiziert
-in `protocol.exe`. In einer heruntergeladenen `protocol.exe` ist der Agent des
-coderpack-Releases enthalten, das deren eigener Build festgelegt hat; lag ein
-coderpack-Checkout daneben, sagt das Skript das ausdrücklich. Mit
-`-Protocol none -Coderpack none` lässt sich dieser Weg auch bei vorhandenen
-Checkouts erzwingen. Die CI verwendet ihn absichtlich bei jedem Push und prüft
-damit bei jedem CI-Build, ob sich das Repository eigenständig bauen lässt.
+Du brauchst nur Go 1.26:
 
 ```powershell
-pwsh tools/build.ps1         # Payload zusammenstellen, dann die Exe bauen
-pwsh tools/build.ps1 -Bump   # dasselbe, vorher die Patch-Nummer in .version erhöhen
-pwsh tools/install.ps1       # bauen und das Ergebnis in den Spielordner kopieren
+pwsh tools/build.ps1         # dist/Sacred Mod Loader.exe bauen
+pwsh tools/install.ps1       # bauen und in den Spielordner kopieren
 ```
 
-Mit `-Protocol`, `-Coderpack` und `-Mappings` lassen sich andere Checkouts
-angeben. Beim Quell-Build von `coderpack` übergibt das Skript die gewählte
-`mappings.json`, sofern die Datei vorhanden ist. Andernfalls verwendet
-`coderpack/tools/addr.py` seine eigene Suchfolge.
+Das Skript lädt Host und JARs aus den Releases, die `dependencies.json`
+festlegt. Liegen Checkouts von `protocol` und `coderpack` daneben, baut es sie
+stattdessen aus den Quellen. Dafür brauchst du zusätzlich JDK 21, Python 3.11
+und Rust 1.98 mit MSVC und LLVM. `-Protocol none -Coderpack none` erzwingt den
+Download auch dann, wenn Checkouts da sind. So baut auch die CI.
 
-Den Pfad zum Spiel liest `tools/install.ps1` aus `.local.settings`. Diese Datei
-wird nicht committet, weil Sacred Gold auf jedem Rechner an einer anderen
-Stelle liegen kann. Sie enthält eine Zeile:
+`tools/install.ps1` liest den Spielpfad aus einer nicht eingecheckten
+`.local.settings`:
 
 ```
 sacred=D:\SteamLibrary\steamapps\common\Sacred Gold
 ```
 
-Der Build leert `install/payload`, erstellt den Ordner neu und legt dort den
-Host, `api.jar`, `zygote.jar` und `VERSION` ab. Mods gehören nicht zum Payload,
-Agent-Skripte ebenso wenig: Stattdessen fragt das Skript den abgelegten Host mit
-`protocol.exe --hooks` nach seinen Hook-Stellen, denn ein Host, der keine nennt,
-hat keinen Agenten in sich. Anschließend bettet `go build` den Payload und die
-Windows-Ressourcen in `dist/Sacred Mod Loader.exe` ein.
-
-Die aktuelle Versionsnummer `0.103.1` steht in `.version`. An ihrer Kopie im
-Spielordner erkennt der Launcher, ob er seine Dateien erneut entpacken muss.
-`-Bump` erhöht vor dem Build den letzten Teil der Versionsnummer.
-
-Die CI läuft für Pull Requests, manuelle Starts und Pushes nach `master`.
-Anschließend führt sie diese Prüfungen aus:
+Tests:
 
 ```powershell
 go vet ./...
 go test ./... -count=1
 ```
 
-Auf `master` veröffentlicht die CI `dist/Sacred Mod Loader.exe` und legt
-`v<version>` nur dann an, wenn dieser Tag noch nicht existiert.
+Wie der Launcher mit den anderen Repositories zusammenhängt, steht in
+[CONTRIBUTING](https://github.com/ancaria-dev/.github/blob/master/CONTRIBUTING.DE.md).
 
-| Verzeichnis | Aufgabe |
-|---|---|
-| `install` | enthält das eingebettete Payload und entpackt es in den Spielordner |
-| `mods` | liest `META-INF/declaration.toml` aus jeder JAR-Datei, ohne sie auszuführen, und prüft, ob der Loader den Mod unterstützt |
-| `registry` | liest Mod-Repositories und installiert, aktualisiert oder löscht Mods und Bilder |
-| `hooks` | fragt den Host im Spielordner nach den Hook-Stellen seines Agenten |
-| `conf` | verwaltet die zuletzt gewählten Einstellungen in `launcher/launcher.json` |
-| `game` | startet zuerst den Host und danach das Spiel und beendet beide gemeinsam |
-| `java` | findet ein geeignetes JDK und lädt bei Bedarf eines herunter |
-| `ui` | stellt die eingebettete Oberfläche in einem WebView2-Fenster dar |
+## Releases
+
+Die Version steht in `.version`. `pwsh tools/version.ps1` gibt sie aus,
+`pwsh tools/version.ps1 0.200.2` setzt eine neue, und `tools/build.ps1 -Bump`
+erhöht vor dem Bauen die letzte Stelle.
+
+Auf `master` veröffentlicht die CI `dist/Sacred Mod Loader.exe` und legt den
+Tag `v<Version>` an, wenn es ihn noch nicht gibt.
 
 ## Lizenz
 
-Der Sacred Mod Loader steht unter der MIT-Lizenz. Der vollständige Text befindet
-sich in [LICENSE](LICENSE).
-
-Das Projekt begann als Proof of Concept und wird ohne Supportzusage
-bereitgestellt. Es sollte zeigen, ob sich Mods in Java für ein altes
-Lieblingsspiel überhaupt umsetzen lassen.
+MIT, siehe [LICENSE](LICENSE).
